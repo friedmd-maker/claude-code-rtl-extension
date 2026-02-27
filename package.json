@@ -1,0 +1,61 @@
+{
+  "name": "claude-code-rtl",
+  "displayName": "Claude Code RTL Support",
+  "description": "Adds RTL (Right-to-Left) text support for Hebrew and Arabic to Claude Code in VS Code and Cursor",
+  "version": "0.1.0",
+  "publisher": "yechielby",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YechielBy/claude-code-rtl-extension"
+  },
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "rtl",
+    "hebrew",
+    "arabic",
+    "claude",
+    "right-to-left",
+    "bidi"
+  ],
+  "extensionDependencies": [
+    "anthropic.claude-code"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claude-rtl.add",
+        "title": "Claude RTL: Activate RTL"
+      },
+      {
+        "command": "claude-rtl.remove",
+        "title": "Claude RTL: Deactivate RTL"
+      },
+      {
+        "command": "claude-rtl.status",
+        "title": "Claude RTL: Check Status"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.94.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  }
+}
