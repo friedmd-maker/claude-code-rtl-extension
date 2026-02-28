@@ -1,8 +1,8 @@
 {
   "name": "claude-code-rtl",
   "displayName": "Claude Code RTL Support",
-  "description": "Adds RTL (Right-to-Left) text support for Hebrew and Arabic to Claude Code in VS Code and Cursor",
-  "version": "0.1.0",
+  "description": "Adds RTL (Right-to-Left) text support for Hebrew, Arabic and Persian to Claude Code in VS Code and Cursor",
+  "version": "0.1.1",
   "publisher": "yechielby",
   "license": "MIT",
   "repository": {
@@ -16,12 +16,28 @@
     "Other"
   ],
   "keywords": [
-    "rtl",
-    "hebrew",
     "arabic",
-    "claude",
-    "right-to-left",
-    "bidi"
+    "arabic-language",
+    "bidi",
+    "bidirectional",
+    "claude-code",
+    "claude-code-plugin",
+    "cursor",
+    "cursor-extension",
+    "cursor-ide",
+    "cursor-plugin",
+    "farsi",
+    "farsi-language",
+    "hebrew",
+    "hebrew-learning",
+    "persian",
+    "persian-language",
+    "rtl",
+    "rtl-support",
+    "vs-code",
+    "vs-code-extenstion",
+    "vscode",
+    "vscode-extension"
   ],
   "extensionDependencies": [
     "anthropic.claude-code"
