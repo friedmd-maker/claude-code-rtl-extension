@@ -26,9 +26,13 @@ export async function updateStatusBar(): Promise<void> {
     }
 
     const statuses = await getStatus(extensions);
-    const anyInstalled = statuses.some(s => s.cssInstalled || s.jsInstalled);
+    const alwaysMode = statuses.some(s => s.mode === 'always');
+    const activeMode = statuses.some(s => s.mode === 'active');
 
-    if (anyInstalled) {
+    if (alwaysMode) {
+        statusBarItem.text = '$(globe) RTL: Always';
+        statusBarItem.tooltip = 'Claude Code RTL is always on. Click to manage.';
+    } else if (activeMode) {
         statusBarItem.text = '$(globe) RTL: Active';
         statusBarItem.tooltip = 'Claude Code RTL support is active. Click to manage.';
     } else {

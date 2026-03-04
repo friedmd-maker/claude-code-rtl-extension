@@ -33,14 +33,22 @@ The original Claude Code for VS Code extension lacks native RTL support. This of
 | Feature | Description |
 |---|---|
 | ▶️ Activate RTL | Injects CSS and a toggle button into the Claude Code chat |
+| 📌 Activate RTL (Always) | Permanently enables RTL without a toggle button |
 | 🔧 Fix BiDi | Activates RTL and fixes reversed text (e.g. "םולש" → "שלום") |
 | ⏹️ Deactivate RTL | Restores original files from backup |
 | 🔍 Check Status | Shows which installations have RTL enabled |
 | 📊 Status Bar | Shows current RTL state at a glance — click to manage |
+| 🔄 Auto-reactivate | Automatically restores RTL after Claude Code updates |
 
 ---
 
-### 🆕 What's New (v0.2.0)
+### 🆕 What's New (v0.3.0)
+
+- **Always RTL mode** — A new mode that permanently enables RTL without needing the toggle button. CSS is injected directly without class dependency, so RTL is always active. Switch between modes via the status bar menu or command palette.
+- **Auto-reactivate** — RTL is automatically restored when Claude Code updates replace its files. No need to manually re-activate.
+- **Auto-activate on install** — RTL activates automatically on first install.
+
+### Previous (v0.2.0)
 
 - **Fix BiDi command** — Solves the reversed text issue where Hebrew/Arabic/Persian words appear mirrored (e.g. "םולש" instead of "שלום"). This happens because Claude Code injects a `*{direction:ltr;unicode-bidi:bidi-override}` rule that forces all text to LTR. The new **Fix BiDi** command activates RTL and removes this problematic rule automatically.
 
@@ -69,11 +77,12 @@ After installation, a status bar item appears at the bottom of VS Code:
 
 | Status | Meaning |
 |---|---|
-| `RTL: Active` ✅ | RTL is injected and ready |
+| `RTL: Active` ✅ | RTL is injected with toggle button |
+| `RTL: Always` 📌 | RTL is permanently on (no toggle needed) |
 | `RTL: Inactive` ⭕ | RTL is not installed |
 | `RTL: N/A` ❌ | Claude Code for VS Code extension not found |
 
-**Click the status bar item** to open a menu with Activate / Deactivate / Status options.
+**Click the status bar item** to open a menu with Activate / Activate (Always) / Deactivate / Status options.
 
 #### 🎯 Option 2: Command Palette
 
@@ -81,7 +90,8 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) and search for:
 
 | Command | Action |
 |---|---|
-| `Claude RTL: Activate RTL` | ▶️ Enable RTL support |
+| `Claude RTL: Activate RTL` | ▶️ Enable RTL support with toggle button |
+| `Claude RTL: Activate RTL (Always)` | 📌 Enable RTL permanently without toggle button |
 | `Claude RTL: Fix BiDi` | 🔧 Activate RTL + fix bidirectional text issues |
 | `Claude RTL: Deactivate RTL` | ⏹️ Disable RTL and restore original files |
 | `Claude RTL: Check Status` | 🔍 View installation status |
@@ -90,18 +100,21 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) and search for:
 
 #### 💬 Using RTL in Chat
 
-After activating RTL and reloading:
+**Active mode** — After activating RTL and reloading:
 
 1. Open the Claude Code chat panel
 2. Click the **⇄** button in the chat header
 3. The interface switches to RTL — text aligns to the right
 4. Click again to return to LTR
 
-> 💡 **Note:** If Claude Code updates and RTL stops working, just run **Claude RTL: Activate RTL** again.
+**Always mode** — RTL is permanently on. No button needed — text is always right-to-left.
 
-> 💡 **Tip:** Not every conversation needs RTL — you can toggle it per chat session.
+> 💡 **Tip (Active mode):** Not every conversation needs RTL — you can toggle it per chat session.
 > Use ⇄ only in conversations where you write in Hebrew, Arabic, or Persian.
-> English-only chats can stay in LTR as usual.
+
+> 💡 **Tip (Always mode):** Use this if you always write in Hebrew, Arabic, or Persian and don't want to toggle each time.
+
+> 🔄 **Auto-reactivate:** If Claude Code updates and replaces its files, RTL is automatically restored on the next startup.
 
 ---
 
@@ -139,7 +152,8 @@ After activating RTL and reloading:
 <summary><strong>❓ RTL stopped working after a Claude Code update</strong></summary>
 
 - When "Claude Code for VS Code" updates, it replaces its files and RTL support is removed
-- Run **Claude RTL: Activate RTL** again to restore it
+- Starting from v0.3.0, RTL is **automatically restored** on the next startup
+- If it doesn't restore automatically, run **Claude RTL: Activate RTL** manually
 
 </details>
 
@@ -172,7 +186,7 @@ MIT — see [LICENSE](LICENSE) for details.
 
 <a id="hebrew"></a>
 
-<details>
+<details open>
 <summary><strong>🇮🇱 עברית</strong></summary>
 
 <div dir="rtl" lang="he">
@@ -196,16 +210,22 @@ MIT — see [LICENSE](LICENSE) for details.
 | תכונה | תיאור |
 |---|---|
 | ▶️ הפעלת RTL | מזריק עיצוב CSS וכפתור מתג לממשק הצ'אט |
+| 📌 הפעלת RTL (תמיד) | מפעיל RTL לצמיתות ללא כפתור מתג |
 | 🔧 תיקון BiDi | מפעיל RTL ומתקן טקסט הפוך (למשל "םולש" → "שלום") |
 | ⏹️ כיבוי RTL | משחזר קבצים מקוריים מגיבוי |
-| 🗄️ שמירת גיבויים | יוצר עותקי גיבוי של הקבצים המקוריים לפני כל שינוי |
-| ↩️ אפשרות הסרה | שחזור המצב המקורי בקלות בכל עת |
 | 🔍 בדיקת סטטוס | מציג אילו התקנות פועלות עם RTL |
 | 📊 שורת מצב | מציג את המצב הנוכחי בתחתית המסך — לחץ לניהול |
+| 🔄 הפעלה מחדש אוטומטית | משחזר RTL אוטומטית לאחר עדכון Claude Code |
 
 ---
 
-### 🆕 מה חדש (v0.2.0)
+### 🆕 מה חדש (v0.3.0)
+
+- **מצב RTL תמידי** — מצב חדש שמפעיל RTL לצמיתות ללא צורך בכפתור מתג. ה-CSS מוזרק ישירות ללא תלות ב-class, כך ש-RTL תמיד פעיל. ניתן לעבור בין מצבים דרך תפריט שורת המצב או לוח הפקודות.
+- **הפעלה מחדש אוטומטית** — RTL משוחזר אוטומטית כאשר עדכון Claude Code מחליף את הקבצים. אין צורך להפעיל ידנית מחדש.
+- **הפעלה אוטומטית בהתקנה** — RTL מופעל אוטומטית בהתקנה ראשונה.
+
+### גרסאות קודמות (v0.2.0)
 
 - **פקודת Fix BiDi** — פותרת את בעיית הטקסט ההפוך שבה מילים בעברית/ערבית/פרסית מופיעות מראה (למשל "םולש" במקום "שלום"). זה קורה כי Claude Code מזריק כלל CSS בעייתי `*{direction:ltr;unicode-bidi:bidi-override}` שכופה כיוון LTR על כל הטקסט. הפקודה החדשה **Fix BiDi** מפעילה RTL ומסירה את הכלל הבעייתי אוטומטית.
 
@@ -234,11 +254,12 @@ MIT — see [LICENSE](LICENSE) for details.
 
 | סטטוס | משמעות |
 |---|---|
-| `RTL: Active` ✅ | RTL מופעל ומוכן |
+| `RTL: Active` ✅ | RTL מופעל עם כפתור מתג |
+| `RTL: Always` 📌 | RTL פעיל תמיד (ללא כפתור) |
 | `RTL: Inactive` ⭕ | RTL לא מותקן |
 | `RTL: N/A` ❌ | התוסף לא נמצא |
 
-**לחץ על פריט שורת המצב** כדי לפתוח תפריט עם אפשרויות הפעלה / כיבוי / סטטוס.
+**לחץ על פריט שורת המצב** כדי לפתוח תפריט עם אפשרויות הפעלה / הפעלה (תמיד) / כיבוי / סטטוס.
 
 #### 🎯 אפשרות 2: לוח פקודות
 
@@ -246,7 +267,8 @@ MIT — see [LICENSE](LICENSE) for details.
 
 | פקודה | פעולה |
 |---|---|
-| `Claude RTL: Activate RTL` | ▶️ הפעלת תמיכת RTL |
+| `Claude RTL: Activate RTL` | ▶️ הפעלת תמיכת RTL עם כפתור מתג |
+| `Claude RTL: Activate RTL (Always)` | 📌 הפעלת RTL לצמיתות ללא כפתור מתג |
 | `Claude RTL: Fix BiDi` | 🔧 הפעלת RTL + תיקון בעיות טקסט דו-כיווני |
 | `Claude RTL: Deactivate RTL` | ⏹️ כיבוי ושחזור קבצים מקוריים |
 | `Claude RTL: Check Status` | 🔍 הצגת מצב ההתקנה |
@@ -255,18 +277,21 @@ MIT — see [LICENSE](LICENSE) for details.
 
 #### 💬 שימוש בצ'אט
 
-לאחר הפעלה וטעינה מחדש:
+**מצב Active** — לאחר הפעלה וטעינה מחדש:
 
 1. פתח את פאנל הצ'אט
 2. לחץ על הכפתור **⇄** בראש הצ'אט
 3. הממשק יעבור לכיווניות מימין לשמאל — טקסט יישר לימין
 4. לחץ שוב כדי לחזור לכיווניות רגילה
 
-> 💡 **שים לב:** אם Claude Code התעדכן ו-RTL הפסיק לעבוד, פשוט הפעל שוב את **Claude RTL: Activate RTL**.
+**מצב Always** — RTL פעיל תמיד. אין צורך בכפתור — הטקסט תמיד מימין לשמאל.
 
-> 💡 **טיפ:** לא כל שיחה צריכה RTL — ניתן להחליט לכל שיחה בנפרד.
+> 💡 **טיפ (מצב Active):** לא כל שיחה צריכה RTL — ניתן להחליט לכל שיחה בנפרד.
 > לחץ ⇄ רק בשיחות שבהן אתה כותב בעברית, ערבית או פרסית.
-> שיחות באנגלית בלבד ימשיכו בכיווניות רגילה.
+
+> 💡 **טיפ (מצב Always):** השתמש במצב זה אם אתה תמיד כותב בעברית, ערבית או פרסית ולא רוצה לעשות מתג בכל פעם.
+
+> 🔄 **הפעלה מחדש אוטומטית:** אם Claude Code מתעדכן ומחליף את הקבצים, RTL משוחזר אוטומטית בהפעלה הבאה.
 
 ---
 
@@ -304,7 +329,8 @@ MIT — see [LICENSE](LICENSE) for details.
 <summary><strong>❓ ה-RTL הפסיק לעבוד לאחר עדכון Claude Code</strong></summary>
 
 - כשהתוסף "Claude Code for VS Code" מתעדכן, הוא מחליף את קבציו ותמיכת ה-RTL נמחקת
-- הפעל שוב את הפקודה **Claude RTL: Activate RTL** כדי לשחזר אותה
+- החל מגרסה v0.3.0, RTL **משוחזר אוטומטית** בהפעלה הבאה
+- אם זה לא משוחזר אוטומטית, הפעל ידנית את **Claude RTL: Activate RTL**
 
 </details>
 
@@ -341,7 +367,7 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 <a id="arabic"></a>
 
-<details>
+<details open>
 <summary><strong>🇸🇦 عربية</strong></summary>
 
 <div dir="rtl" lang="ar">
@@ -365,16 +391,22 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 | الميزة | الوصف |
 |---|---|
 | ▶️ تفعيل RTL | تحقن تنسيقات CSS وزر تبديل في واجهة المحادثة |
+| 📌 تفعيل RTL (دائم) | تفعيل RTL بشكل دائم بدون زر تبديل |
 | 🔧 إصلاح BiDi | تفعيل RTL وإصلاح النص المعكوس (مثل "ملاس" → "سلام") |
 | ⏹️ إيقاف RTL | تستعيد الملفات الأصلية من النسخ الاحتياطية |
-| 🗄️ حفظ النسخ الاحتياطية | تنشئ نسخًا احتياطية من الملفات الأصلية قبل أي تعديل |
-| ↩️ إمكانية الإزالة | خيار لاستعادة الحالة الأصلية بسهولة في أي وقت |
 | 🔍 فحص الحالة | يعرض التثبيتات التي تعمل بـ RTL |
 | 📊 شريط الحالة | يعرض الحالة الحالية في أسفل الشاشة — انقر للإدارة |
+| 🔄 إعادة تفعيل تلقائية | تستعيد RTL تلقائيًا بعد تحديث Claude Code |
 
 ---
 
-### 🆕 ما الجديد (v0.2.0)
+### 🆕 ما الجديد (v0.3.0)
+
+- **وضع RTL الدائم** — وضع جديد يفعّل RTL بشكل دائم بدون الحاجة لزر التبديل. يتم حقن CSS مباشرة بدون اعتماد على class، لذا RTL يكون دائمًا نشطًا. يمكنك التبديل بين الأوضاع عبر قائمة شريط الحالة أو لوحة الأوامر.
+- **إعادة تفعيل تلقائية** — يتم استعادة RTL تلقائيًا عندما يقوم تحديث Claude Code باستبدال ملفاته. لا حاجة لإعادة التفعيل يدويًا.
+- **تفعيل تلقائي عند التثبيت** — يتم تفعيل RTL تلقائيًا عند التثبيت لأول مرة.
+
+### السابق (v0.2.0)
 
 - **أمر Fix BiDi** — يحل مشكلة النص المعكوس حيث تظهر الكلمات العربية/العبرية/الفارسية بشكل معكوس (مثل "ملاس" بدلاً من "سلام"). يحدث هذا لأن Claude Code يحقن قاعدة CSS `*{direction:ltr;unicode-bidi:bidi-override}` التي تجبر كل النص على LTR. الأمر الجديد **Fix BiDi** يفعّل RTL ويزيل هذه القاعدة تلقائيًا.
 
@@ -403,11 +435,12 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 | الحالة | المعنى |
 |---|---|
-| `RTL: Active` ✅ | RTL مفعّل وجاهز |
+| `RTL: Active` ✅ | RTL مفعّل مع زر تبديل |
+| `RTL: Always` 📌 | RTL نشط دائمًا (بدون زر) |
 | `RTL: Inactive` ⭕ | RTL غير مثبت |
 | `RTL: N/A` ❌ | الإضافة غير موجودة |
 
-**انقر على عنصر شريط الحالة** لفتح قائمة بخيارات التفعيل / الإيقاف / الحالة.
+**انقر على عنصر شريط الحالة** لفتح قائمة بخيارات التفعيل / التفعيل (دائم) / الإيقاف / الحالة.
 
 #### 🎯 الخيار 2: لوحة الأوامر
 
@@ -415,7 +448,8 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 | الأمر | الإجراء |
 |---|---|
-| `Claude RTL: Activate RTL` | ▶️ تفعيل دعم RTL |
+| `Claude RTL: Activate RTL` | ▶️ تفعيل دعم RTL مع زر تبديل |
+| `Claude RTL: Activate RTL (Always)` | 📌 تفعيل RTL بشكل دائم بدون زر تبديل |
 | `Claude RTL: Fix BiDi` | 🔧 تفعيل RTL + إصلاح مشاكل النص ثنائي الاتجاه |
 | `Claude RTL: Deactivate RTL` | ⏹️ إيقاف الدعم واستعادة الملفات الأصلية |
 | `Claude RTL: Check Status` | 🔍 عرض حالة التثبيت |
@@ -424,18 +458,21 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 #### 💬 الاستخدام في المحادثة
 
-بعد التفعيل وإعادة التحميل:
+**وضع Active** — بعد التفعيل وإعادة التحميل:
 
 1. افتح لوحة المحادثة
 2. اضغط على الزر **⇄** في أعلى المحادثة
 3. ستتحول الواجهة إلى اتجاه من اليمين إلى اليسار — سيتم محاذاة النص إلى اليمين
 4. اضغط على الزر مرة أخرى للعودة إلى الاتجاه العادي
 
-> 💡 **ملاحظة:** إذا تحدّث Claude Code وتوقف RTL عن العمل، فقط شغّل **Claude RTL: Activate RTL** مرة أخرى.
+**وضع Always** — RTL نشط دائمًا. لا حاجة لزر — النص دائمًا من اليمين إلى اليسار.
 
-> 💡 **نصيحة:** ليست كل المحادثات تحتاج RTL — يمكنك تفعيله لكل محادثة على حدة.
+> 💡 **نصيحة (وضع Active):** ليست كل المحادثات تحتاج RTL — يمكنك تفعيله لكل محادثة على حدة.
 > استخدم ⇄ فقط في المحادثات التي تكتب فيها بالعربية أو العبرية أو الفارسية.
-> المحادثات الإنجليزية فقط تبقى في الاتجاه العادي.
+
+> 💡 **نصيحة (وضع Always):** استخدم هذا الوضع إذا كنت تكتب دائمًا بالعربية أو العبرية أو الفارسية ولا تريد التبديل في كل مرة.
+
+> 🔄 **إعادة تفعيل تلقائية:** إذا تم تحديث Claude Code واستبدال ملفاته، يتم استعادة RTL تلقائيًا عند بدء التشغيل التالي.
 
 ---
 
@@ -473,7 +510,8 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 <summary><strong>❓ توقف RTL عن العمل بعد تحديث Claude Code</strong></summary>
 
 - عند تحديث إضافة "Claude Code for VS Code"، يتم استبدال ملفاتها وتُحذف تهيئة RTL
-- شغّل الأمر **Claude RTL: Activate RTL** مرة أخرى لاستعادتها
+- بدءًا من الإصدار v0.3.0، يتم **استعادة RTL تلقائيًا** عند بدء التشغيل التالي
+- إذا لم تتم الاستعادة تلقائيًا، شغّل **Claude RTL: Activate RTL** يدويًا
 
 </details>
 
@@ -510,7 +548,7 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 <a id="persian"></a>
 
-<details>
+<details open>
 <summary><strong>🇮🇷 فارسی</strong></summary>
 
 <div dir="rtl" lang="fa">
@@ -534,16 +572,22 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 | ویژگی | توضیح |
 |---|---|
 | ▶️ فعال‌سازی RTL | CSS و یک دکمه تغییر را به رابط چت تزریق می‌کند |
+| 📌 فعال‌سازی RTL (همیشه) | فعال‌سازی دائمی RTL بدون دکمه تغییر |
 | 🔧 رفع BiDi | فعال‌سازی RTL و رفع متن معکوس (مثلاً "ملاس" → "سلام") |
 | ⏹️ غیرفعال‌سازی RTL | فایل‌های اصلی را از نسخه پشتیبان بازیابی می‌کند |
-| 🗄️ ذخیره نسخه پشتیبان | قبل از هر تغییر، نسخه پشتیبان از فایل‌های اصلی ایجاد می‌کند |
-| ↩️ امکان حذف | بازیابی آسان وضعیت اصلی در هر زمان |
 | 🔍 بررسی وضعیت | نشان می‌دهد کدام نصب‌ها RTL فعال دارند |
 | 📊 نوار وضعیت | وضعیت فعلی RTL را نمایش می‌دهد — برای مدیریت کلیک کنید |
+| 🔄 فعال‌سازی مجدد خودکار | RTL را به‌طور خودکار پس از به‌روزرسانی Claude Code بازیابی می‌کند |
 
 ---
 
-### 🆕 تازه‌ها (v0.2.0)
+### 🆕 تازه‌ها (v0.3.0)
+
+- **حالت RTL همیشه** — حالت جدیدی که RTL را به‌صورت دائمی فعال می‌کند بدون نیاز به دکمه تغییر. CSS مستقیماً بدون وابستگی به class تزریق می‌شود، بنابراین RTL همیشه فعال است. می‌توانید بین حالت‌ها از طریق منوی نوار وضعیت یا پالت فرمان جابجا شوید.
+- **فعال‌سازی مجدد خودکار** — RTL به‌طور خودکار بازیابی می‌شود وقتی به‌روزرسانی Claude Code فایل‌هایش را جایگزین می‌کند. نیازی به فعال‌سازی مجدد دستی نیست.
+- **فعال‌سازی خودکار هنگام نصب** — RTL به‌طور خودکار هنگام نصب اولیه فعال می‌شود.
+
+### قبلی (v0.2.0)
 
 - **دستور Fix BiDi** — مشکل متن معکوس را حل می‌کند که در آن کلمات فارسی/عربی/عبری به صورت آینه‌ای نمایش داده می‌شوند (مثلاً "ملاس" به جای "سلام"). این اتفاق می‌افتد زیرا Claude Code یک قاعده CSS `*{direction:ltr;unicode-bidi:bidi-override}` تزریق می‌کند که همه متن‌ها را به LTR مجبور می‌کند. دستور جدید **Fix BiDi** پشتیبانی RTL را فعال کرده و این قاعده مشکل‌ساز را به‌صورت خودکار حذف می‌کند.
 
@@ -572,11 +616,12 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 | وضعیت | معنی |
 |---|---|
-| `RTL: Active` ✅ | RTL فعال و آماده است |
+| `RTL: Active` ✅ | RTL فعال با دکمه تغییر |
+| `RTL: Always` 📌 | RTL همیشه فعال (بدون دکمه) |
 | `RTL: Inactive` ⭕ | RTL نصب نشده است |
 | `RTL: N/A` ❌ | افزونه پیدا نشد |
 
-**روی آیتم نوار وضعیت کلیک کنید** تا منویی با گزینه‌های فعال‌سازی / غیرفعال‌سازی / وضعیت باز شود.
+**روی آیتم نوار وضعیت کلیک کنید** تا منویی با گزینه‌های فعال‌سازی / فعال‌سازی (همیشه) / غیرفعال‌سازی / وضعیت باز شود.
 
 #### 🎯 گزینه ۲: پالت فرمان
 
@@ -584,7 +629,8 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 | فرمان | عملکرد |
 |---|---|
-| `Claude RTL: Activate RTL` | ▶️ فعال‌سازی پشتیبانی RTL |
+| `Claude RTL: Activate RTL` | ▶️ فعال‌سازی پشتیبانی RTL با دکمه تغییر |
+| `Claude RTL: Activate RTL (Always)` | 📌 فعال‌سازی دائمی RTL بدون دکمه تغییر |
 | `Claude RTL: Fix BiDi` | 🔧 فعال‌سازی RTL + رفع مشکلات متن دوجهته |
 | `Claude RTL: Deactivate RTL` | ⏹️ غیرفعال‌سازی و بازیابی فایل‌های اصلی |
 | `Claude RTL: Check Status` | 🔍 نمایش وضعیت نصب |
@@ -593,18 +639,21 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 #### 💬 استفاده در چت
 
-پس از فعال‌سازی و بارگذاری مجدد:
+**حالت Active** — پس از فعال‌سازی و بارگذاری مجدد:
 
 1. پانل چت را باز کنید
 2. روی دکمه **⇄** در هدر چت کلیک کنید
 3. رابط به RTL تغییر می‌کند — متن به سمت راست تراز می‌شود
 4. برای بازگشت به LTR دوباره کلیک کنید
 
-> 💡 **نکته:** اگر Claude Code به‌روزرسانی شد و RTL کار نکرد، کافیست **Claude RTL: Activate RTL** را دوباره اجرا کنید.
+**حالت Always** — RTL همیشه فعال است. نیازی به دکمه نیست — متن همیشه از راست به چپ است.
 
-> 💡 **نکته:** همه مکالمات نیاز به RTL ندارند — می‌توانید آن را برای هر مکالمه جداگانه فعال کنید.
+> 💡 **نکته (حالت Active):** همه مکالمات نیاز به RTL ندارند — می‌توانید آن را برای هر مکالمه جداگانه فعال کنید.
 > از ⇄ فقط در مکالماتی استفاده کنید که به فارسی، عربی یا عبری می‌نویسید.
-> مکالمات انگلیسی می‌توانند به حالت معمول LTR باقی بمانند.
+
+> 💡 **نکته (حالت Always):** اگر همیشه به فارسی، عربی یا عبری می‌نویسید و نمی‌خواهید هر بار تغییر دهید، از این حالت استفاده کنید.
+
+> 🔄 **فعال‌سازی مجدد خودکار:** اگر Claude Code به‌روزرسانی شد و فایل‌هایش جایگزین شدند، RTL به‌طور خودکار در راه‌اندازی بعدی بازیابی می‌شود.
 
 ---
 
@@ -642,7 +691,8 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 <summary><strong>❓ RTL پس از به‌روزرسانی Claude Code کار نمی‌کند</strong></summary>
 
 - هنگامی که افزونه "Claude Code for VS Code" به‌روزرسانی می‌شود، فایل‌هایش جایگزین شده و پشتیبانی RTL حذف می‌شود
-- دوباره دستور **Claude RTL: Activate RTL** را اجرا کنید تا بازیابی شود
+- از نسخه v0.3.0، RTL **به‌طور خودکار بازیابی می‌شود** در راه‌اندازی بعدی
+- اگر به‌طور خودکار بازیابی نشد، دستور **Claude RTL: Activate RTL** را دستی اجرا کنید
 
 </details>
 

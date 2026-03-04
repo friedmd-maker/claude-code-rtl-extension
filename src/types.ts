@@ -10,6 +10,9 @@ export interface ClaudeExtensionInfo {
     name: string;
 }
 
+/** RTL operating mode */
+export type RtlMode = 'active' | 'always' | 'inactive';
+
 /** RTL installation status for a single extension */
 export interface RtlStatus {
     extension: ClaudeExtensionInfo;
@@ -17,4 +20,5 @@ export interface RtlStatus {
     jsInstalled: boolean;
     cssBackupExists: boolean;
     jsBackupExists: boolean;
+    mode: RtlMode;
 }

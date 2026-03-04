@@ -12,9 +12,14 @@ export const JS_START_MARKER = '/* RTL Toggle Button - Added by script */';
 /** Marker at the end of injected JS block */
 export const JS_END_MARKER = '/* End RTL Toggle Button */';
 
+/** Marker to identify RTL mode inside injected CSS */
+export const RTL_MODE_ACTIVE_MARKER = '/* RTL-MODE: active */';
+export const RTL_MODE_ALWAYS_MARKER = '/* RTL-MODE: always */';
+
 /** RTL CSS rules to inject — identical to Python RTL_CSS_RULES */
 export const RTL_CSS_RULES = `
 /* RTL Text Support for Claude Code VS Code / Cursor Extension - Added by script */
+/* RTL-MODE: active */
 
 /* ==========================================
    Toggle button - always visible
@@ -212,3 +217,24 @@ export const RTL_JS_CODE = `
 })();
 /* End RTL Toggle Button */
 `;
+
+/**
+ * Generate CSS rules for "Always" mode — no `.YBYrtl` class dependency, no button styles.
+ */
+export function generateAlwaysCssRules(): string {
+    let css = RTL_CSS_RULES;
+
+    // Replace mode marker
+    css = css.replace(RTL_MODE_ACTIVE_MARKER, RTL_MODE_ALWAYS_MARKER);
+
+    // Remove button styling section
+    css = css.replace(
+        /\/\* =+\s*\n\s*Toggle button - always visible\s*\n\s*=+ \*\/[\s\S]*?#yby-rtl-btn\.yby-active\s*\{[^}]*\}/,
+        '',
+    );
+
+    // Remove `.YBYrtl ` prefix from all selectors
+    css = css.replace(/\.YBYrtl\s+/g, '');
+
+    return css;
+}

@@ -4,6 +4,8 @@ import {
     RTL_CSS_RULES, RTL_JS_CODE,
     RTL_START_MARKER, RTL_END_MARKER,
     JS_START_MARKER, JS_END_MARKER,
+    RTL_MODE_ALWAYS_MARKER,
+    generateAlwaysCssRules,
 } from './content.js';
 
 /**
@@ -25,6 +27,18 @@ export async function isCssInstalled(cssPath: string): Promise<boolean> {
     try {
         const content = await fs.readFile(cssPath, 'utf-8');
         return content.includes(RTL_START_MARKER);
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Check if CSS is in "always" mode (no .YBYrtl class dependency).
+ */
+export async function isAlwaysMode(cssPath: string): Promise<boolean> {
+    try {
+        const content = await fs.readFile(cssPath, 'utf-8');
+        return content.includes(RTL_MODE_ALWAYS_MARKER);
     } catch {
         return false;
     }
@@ -70,12 +84,15 @@ export async function getStatus(extensions: ClaudeExtensionInfo[]): Promise<RtlS
     const statuses: RtlStatus[] = [];
 
     for (const ext of extensions) {
+        const cssInstalled = await isCssInstalled(ext.cssPath);
+        const alwaysMode = cssInstalled && await isAlwaysMode(ext.cssPath);
         statuses.push({
             extension: ext,
-            cssInstalled: await isCssInstalled(ext.cssPath),
+            cssInstalled,
             jsInstalled: await isJsInstalled(ext.jsPath),
             cssBackupExists: await exists(ext.cssPath + '.bak'),
             jsBackupExists: ext.jsPath ? await exists(ext.jsPath + '.bak') : false,
+            mode: alwaysMode ? 'always' : cssInstalled ? 'active' : 'inactive',
         });
     }
 
@@ -154,14 +171,69 @@ export async function addRtl(ext: ClaudeExtensionInfo): Promise<{ messages: stri
     return { messages, changed };
 }
 
+/**
+ * Add RTL "Always" mode — CSS without .YBYrtl class, no JS button.
+ * Handles transitions from any state (Inactive, Active, Always).
+ */
+export async function addRtlAlways(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+    const messages: string[] = [];
+    let changed = false;
+
+    // --- CSS: restore from backup and inject "always" version ---
+    try {
+        const backupPath = ext.cssPath + '.bak';
+
+        if (await exists(backupPath)) {
+            await fs.copyFile(backupPath, ext.cssPath);
+            messages.push(`  CSS: Restored from backup`);
+        } else {
+            await fs.copyFile(ext.cssPath, backupPath);
+            messages.push(`  CSS: Backup created: ${backupPath}`);
+        }
+
+        const content = await fs.readFile(ext.cssPath, 'utf-8');
+        await fs.writeFile(ext.cssPath, content + '\n' + generateAlwaysCssRules(), 'utf-8');
+        messages.push(`  CSS: RTL Always support added to ${ext.name}`);
+        changed = true;
+    } catch (e: unknown) {
+        const err = e as NodeJS.ErrnoException;
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+            messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
+            messages.push('       Try running with elevated privileges');
+        } else {
+            messages.push(`  CSS: Error: ${err.message}`);
+        }
+    }
+
+    // --- JS: remove button if installed (restore from backup, delete .bak) ---
+    if (ext.jsPath && await isJsInstalled(ext.jsPath)) {
+        try {
+            const backupPath = ext.jsPath + '.bak';
+            if (await exists(backupPath)) {
+                await fs.copyFile(backupPath, ext.jsPath);
+                await fs.unlink(backupPath);
+                messages.push(`  JS:  Toggle button removed (backup deleted)`);
+                changed = true;
+            }
+        } catch (e: unknown) {
+            messages.push(`  JS:  Error removing button: ${(e as Error).message}`);
+        }
+    } else {
+        messages.push(`  JS:  No button to remove (Always mode — no JS needed)`);
+    }
+
+    return { messages, changed };
+}
+
 const BIDI_OVERRIDE = '*{direction:ltr;unicode-bidi:bidi-override}';
 
 /**
  * Add RTL support and fix BiDi issue by removing the bidi-override rule from CSS.
- * Same as addRtl() but also strips the problematic bidi-override rule.
+ * Preserves the current mode: if in Always mode stays Always, otherwise uses Active.
  */
 export async function fixBidi(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
-    const result = await addRtl(ext);
+    const currentlyAlways = await isAlwaysMode(ext.cssPath);
+    const result = currentlyAlways ? await addRtlAlways(ext) : await addRtl(ext);
 
     // After injection, remove the bidi-override rule from the CSS file
     try {

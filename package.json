@@ -2,7 +2,7 @@
   "name": "claude-code-rtl",
   "displayName": "Claude Code RTL Support",
   "description": "Adds RTL (Right-to-Left) text support for Hebrew, Arabic and Persian to Claude Code in VS Code and Cursor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "yechielby",
   "license": "MIT",
   "repository": {
@@ -52,6 +52,10 @@
       {
         "command": "claude-rtl.add",
         "title": "Claude RTL: Activate RTL"
+      },
+      {
+        "command": "claude-rtl.addAlways",
+        "title": "Claude RTL: Activate RTL (Always)"
       },
       {
         "command": "claude-rtl.remove",
