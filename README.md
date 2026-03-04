@@ -8,17 +8,11 @@
 
 | | Language | Jump to |
 |---|---|---|
-| 🇺🇸 | English | [Jump ↓](#english) |
 | 🇮🇱 | עברית | [קפוץ ↓](#hebrew) |
 | 🇸🇦 | عربية | [انتقل ↓](#arabic) |
 | 🇮🇷 | فارسی | [برو ↓](#persian) |
 
 ---
-
-<details open>
-<summary><strong>🇺🇸 English</strong></summary>
-
-<a id="english"></a>
 
 ## 🇺🇸 English
 
@@ -39,9 +33,16 @@ The original Claude Code for VS Code extension lacks native RTL support. This of
 | Feature | Description |
 |---|---|
 | ▶️ Activate RTL | Injects CSS and a toggle button into the Claude Code chat |
+| 🔧 Fix BiDi | Activates RTL and fixes reversed text (e.g. "םולש" → "שלום") |
 | ⏹️ Deactivate RTL | Restores original files from backup |
 | 🔍 Check Status | Shows which installations have RTL enabled |
 | 📊 Status Bar | Shows current RTL state at a glance — click to manage |
+
+---
+
+### 🆕 What's New (v0.2.0)
+
+- **Fix BiDi command** — Solves the reversed text issue where Hebrew/Arabic/Persian words appear mirrored (e.g. "םולש" instead of "שלום"). This happens because Claude Code injects a `*{direction:ltr;unicode-bidi:bidi-override}` rule that forces all text to LTR. The new **Fix BiDi** command activates RTL and removes this problematic rule automatically.
 
 ---
 
@@ -57,13 +58,6 @@ The original Claude Code for VS Code extension lacks native RTL support. This of
 |---|
 | VS Code |
 | Cursor |
-
-| 🖥️ Operating Systems |
-|---|
-| Windows |
-| macOS |
-| Linux |
-| WSL |
 
 ---
 
@@ -88,6 +82,7 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) and search for:
 | Command | Action |
 |---|---|
 | `Claude RTL: Activate RTL` | ▶️ Enable RTL support |
+| `Claude RTL: Fix BiDi` | 🔧 Activate RTL + fix bidirectional text issues |
 | `Claude RTL: Deactivate RTL` | ⏹️ Disable RTL and restore original files |
 | `Claude RTL: Check Status` | 🔍 View installation status |
 
@@ -149,6 +144,15 @@ After activating RTL and reloading:
 </details>
 
 <details>
+<summary><strong>❓ Hebrew/Arabic text appears reversed (e.g. "םולש" instead of "שלום")</strong></summary>
+
+- This is caused by a `bidi-override` CSS rule in Claude Code that forces LTR direction on all text
+- Use **Claude RTL: Fix BiDi** instead of **Activate RTL** to fix this
+- Note: Running **Activate RTL** again will bring back the issue — use **Fix BiDi** each time
+
+</details>
+
+<details>
 <summary><strong>❓ Permission Denied error</strong></summary>
 
 - **Windows:** Try running VS Code as Administrator
@@ -164,14 +168,12 @@ MIT — see [LICENSE](LICENSE) for details.
 
 [🔝 Back to top](#claude-code-rtl-support)
 
-</details>
-
 ---
+
+<a id="hebrew"></a>
 
 <details>
 <summary><strong>🇮🇱 עברית</strong></summary>
-
-<a id="hebrew"></a>
 
 <div dir="rtl" lang="he">
 
@@ -194,11 +196,18 @@ MIT — see [LICENSE](LICENSE) for details.
 | תכונה | תיאור |
 |---|---|
 | ▶️ הפעלת RTL | מזריק עיצוב CSS וכפתור מתג לממשק הצ'אט |
+| 🔧 תיקון BiDi | מפעיל RTL ומתקן טקסט הפוך (למשל "םולש" → "שלום") |
 | ⏹️ כיבוי RTL | משחזר קבצים מקוריים מגיבוי |
 | 🗄️ שמירת גיבויים | יוצר עותקי גיבוי של הקבצים המקוריים לפני כל שינוי |
 | ↩️ אפשרות הסרה | שחזור המצב המקורי בקלות בכל עת |
 | 🔍 בדיקת סטטוס | מציג אילו התקנות פועלות עם RTL |
 | 📊 שורת מצב | מציג את המצב הנוכחי בתחתית המסך — לחץ לניהול |
+
+---
+
+### 🆕 מה חדש (v0.2.0)
+
+- **פקודת Fix BiDi** — פותרת את בעיית הטקסט ההפוך שבה מילים בעברית/ערבית/פרסית מופיעות מראה (למשל "םולש" במקום "שלום"). זה קורה כי Claude Code מזריק כלל CSS בעייתי `*{direction:ltr;unicode-bidi:bidi-override}` שכופה כיוון LTR על כל הטקסט. הפקודה החדשה **Fix BiDi** מפעילה RTL ומסירה את הכלל הבעייתי אוטומטית.
 
 ---
 
@@ -214,13 +223,6 @@ MIT — see [LICENSE](LICENSE) for details.
 |---|
 | VS Code |
 | Cursor |
-
-| 🖥️ מערכות הפעלה |
-|---|
-| Windows |
-| macOS |
-| Linux |
-| WSL |
 
 ---
 
@@ -245,6 +247,7 @@ MIT — see [LICENSE](LICENSE) for details.
 | פקודה | פעולה |
 |---|---|
 | `Claude RTL: Activate RTL` | ▶️ הפעלת תמיכת RTL |
+| `Claude RTL: Fix BiDi` | 🔧 הפעלת RTL + תיקון בעיות טקסט דו-כיווני |
 | `Claude RTL: Deactivate RTL` | ⏹️ כיבוי ושחזור קבצים מקוריים |
 | `Claude RTL: Check Status` | 🔍 הצגת מצב ההתקנה |
 
@@ -306,6 +309,15 @@ MIT — see [LICENSE](LICENSE) for details.
 </details>
 
 <details>
+<summary><strong>❓ טקסט עברי/ערבי מופיע הפוך (למשל "םולש" במקום "שלום")</strong></summary>
+
+- זה נגרם על ידי כלל `bidi-override` ב-CSS של Claude Code שכופה כיוון LTR על כל הטקסט
+- השתמש ב-**Claude RTL: Fix BiDi** במקום **Activate RTL** כדי לתקן את זה
+- שים לב: הפעלת **Activate RTL** שוב תחזיר את הבעיה — השתמש ב-**Fix BiDi** בכל פעם
+
+</details>
+
+<details>
 <summary><strong>❓ שגיאת הרשאות</strong></summary>
 
 - **Windows:** נסה להריץ את VS Code כמנהל מערכת
@@ -327,10 +339,10 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 ---
 
+<a id="arabic"></a>
+
 <details>
 <summary><strong>🇸🇦 عربية</strong></summary>
-
-<a id="arabic"></a>
 
 <div dir="rtl" lang="ar">
 
@@ -353,11 +365,18 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 | الميزة | الوصف |
 |---|---|
 | ▶️ تفعيل RTL | تحقن تنسيقات CSS وزر تبديل في واجهة المحادثة |
+| 🔧 إصلاح BiDi | تفعيل RTL وإصلاح النص المعكوس (مثل "ملاس" → "سلام") |
 | ⏹️ إيقاف RTL | تستعيد الملفات الأصلية من النسخ الاحتياطية |
 | 🗄️ حفظ النسخ الاحتياطية | تنشئ نسخًا احتياطية من الملفات الأصلية قبل أي تعديل |
 | ↩️ إمكانية الإزالة | خيار لاستعادة الحالة الأصلية بسهولة في أي وقت |
 | 🔍 فحص الحالة | يعرض التثبيتات التي تعمل بـ RTL |
 | 📊 شريط الحالة | يعرض الحالة الحالية في أسفل الشاشة — انقر للإدارة |
+
+---
+
+### 🆕 ما الجديد (v0.2.0)
+
+- **أمر Fix BiDi** — يحل مشكلة النص المعكوس حيث تظهر الكلمات العربية/العبرية/الفارسية بشكل معكوس (مثل "ملاس" بدلاً من "سلام"). يحدث هذا لأن Claude Code يحقن قاعدة CSS `*{direction:ltr;unicode-bidi:bidi-override}` التي تجبر كل النص على LTR. الأمر الجديد **Fix BiDi** يفعّل RTL ويزيل هذه القاعدة تلقائيًا.
 
 ---
 
@@ -373,13 +392,6 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 |---|
 | VS Code |
 | Cursor |
-
-| 🖥️ أنظمة التشغيل |
-|---|
-| Windows |
-| macOS |
-| Linux |
-| WSL |
 
 ---
 
@@ -404,6 +416,7 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 | الأمر | الإجراء |
 |---|---|
 | `Claude RTL: Activate RTL` | ▶️ تفعيل دعم RTL |
+| `Claude RTL: Fix BiDi` | 🔧 تفعيل RTL + إصلاح مشاكل النص ثنائي الاتجاه |
 | `Claude RTL: Deactivate RTL` | ⏹️ إيقاف الدعم واستعادة الملفات الأصلية |
 | `Claude RTL: Check Status` | 🔍 عرض حالة التثبيت |
 
@@ -465,6 +478,15 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 </details>
 
 <details>
+<summary><strong>❓ النص العربي/العبري يظهر معكوسًا (مثل "ملاس" بدلاً من "سلام")</strong></summary>
+
+- هذا بسبب قاعدة `bidi-override` في CSS الخاص بـ Claude Code التي تجبر اتجاه LTR على كل النص
+- استخدم **Claude RTL: Fix BiDi** بدلاً من **Activate RTL** لإصلاح هذا
+- ملاحظة: تشغيل **Activate RTL** مرة أخرى سيعيد المشكلة — استخدم **Fix BiDi** في كل مرة
+
+</details>
+
+<details>
 <summary><strong>❓ خطأ في الصلاحيات</strong></summary>
 
 - **Windows:** جرّب تشغيل VS Code كمسؤول
@@ -486,10 +508,10 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 ---
 
+<a id="persian"></a>
+
 <details>
 <summary><strong>🇮🇷 فارسی</strong></summary>
-
-<a id="persian"></a>
 
 <div dir="rtl" lang="fa">
 
@@ -512,11 +534,18 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 | ویژگی | توضیح |
 |---|---|
 | ▶️ فعال‌سازی RTL | CSS و یک دکمه تغییر را به رابط چت تزریق می‌کند |
+| 🔧 رفع BiDi | فعال‌سازی RTL و رفع متن معکوس (مثلاً "ملاس" → "سلام") |
 | ⏹️ غیرفعال‌سازی RTL | فایل‌های اصلی را از نسخه پشتیبان بازیابی می‌کند |
 | 🗄️ ذخیره نسخه پشتیبان | قبل از هر تغییر، نسخه پشتیبان از فایل‌های اصلی ایجاد می‌کند |
 | ↩️ امکان حذف | بازیابی آسان وضعیت اصلی در هر زمان |
 | 🔍 بررسی وضعیت | نشان می‌دهد کدام نصب‌ها RTL فعال دارند |
 | 📊 نوار وضعیت | وضعیت فعلی RTL را نمایش می‌دهد — برای مدیریت کلیک کنید |
+
+---
+
+### 🆕 تازه‌ها (v0.2.0)
+
+- **دستور Fix BiDi** — مشکل متن معکوس را حل می‌کند که در آن کلمات فارسی/عربی/عبری به صورت آینه‌ای نمایش داده می‌شوند (مثلاً "ملاس" به جای "سلام"). این اتفاق می‌افتد زیرا Claude Code یک قاعده CSS `*{direction:ltr;unicode-bidi:bidi-override}` تزریق می‌کند که همه متن‌ها را به LTR مجبور می‌کند. دستور جدید **Fix BiDi** پشتیبانی RTL را فعال کرده و این قاعده مشکل‌ساز را به‌صورت خودکار حذف می‌کند.
 
 ---
 
@@ -532,13 +561,6 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 |---|
 | VS Code |
 | Cursor |
-
-| 🖥️ سیستم‌عامل‌ها |
-|---|
-| Windows |
-| macOS |
-| Linux |
-| WSL |
 
 ---
 
@@ -563,6 +585,7 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 | فرمان | عملکرد |
 |---|---|
 | `Claude RTL: Activate RTL` | ▶️ فعال‌سازی پشتیبانی RTL |
+| `Claude RTL: Fix BiDi` | 🔧 فعال‌سازی RTL + رفع مشکلات متن دوجهته |
 | `Claude RTL: Deactivate RTL` | ⏹️ غیرفعال‌سازی و بازیابی فایل‌های اصلی |
 | `Claude RTL: Check Status` | 🔍 نمایش وضعیت نصب |
 
@@ -620,6 +643,15 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 - هنگامی که افزونه "Claude Code for VS Code" به‌روزرسانی می‌شود، فایل‌هایش جایگزین شده و پشتیبانی RTL حذف می‌شود
 - دوباره دستور **Claude RTL: Activate RTL** را اجرا کنید تا بازیابی شود
+
+</details>
+
+<details>
+<summary><strong>❓ متن فارسی/عربی به صورت معکوس نمایش داده می‌شود</strong></summary>
+
+- این به دلیل قاعده `bidi-override` در CSS مربوط به Claude Code است که جهت LTR را بر همه متن‌ها اعمال می‌کند
+- به جای **Activate RTL** از **Claude RTL: Fix BiDi** استفاده کنید
+- توجه: اجرای مجدد **Activate RTL** مشکل را بازمی‌گرداند — هر بار از **Fix BiDi** استفاده کنید
 
 </details>
 

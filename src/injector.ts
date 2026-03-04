@@ -91,28 +91,30 @@ export async function addRtl(ext: ClaudeExtensionInfo): Promise<{ messages: stri
     let changed = false;
 
     // --- CSS ---
-    if (await isCssInstalled(ext.cssPath)) {
-        messages.push(`  CSS: RTL already installed in ${ext.name}`);
-    } else {
-        try {
-            const backupPath = ext.cssPath + '.bak';
-            if (!(await exists(backupPath))) {
-                await fs.copyFile(ext.cssPath, backupPath);
-                messages.push(`  CSS: Backup created: ${backupPath}`);
-            }
+    try {
+        const backupPath = ext.cssPath + '.bak';
 
-            const content = await fs.readFile(ext.cssPath, 'utf-8');
-            await fs.writeFile(ext.cssPath, content + '\n' + RTL_CSS_RULES, 'utf-8');
-            messages.push(`  CSS: RTL support added to ${ext.name}`);
-            changed = true;
-        } catch (e: unknown) {
-            const err = e as NodeJS.ErrnoException;
-            if (err.code === 'EPERM' || err.code === 'EACCES') {
-                messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
-                messages.push('       Try running with elevated privileges');
-            } else {
-                messages.push(`  CSS: Error: ${err.message}`);
-            }
+        if (await exists(backupPath)) {
+            // Backup exists: restore clean file, then re-inject
+            await fs.copyFile(backupPath, ext.cssPath);
+            messages.push(`  CSS: Restored from backup`);
+        } else {
+            // First time: create backup
+            await fs.copyFile(ext.cssPath, backupPath);
+            messages.push(`  CSS: Backup created: ${backupPath}`);
+        }
+
+        const content = await fs.readFile(ext.cssPath, 'utf-8');
+        await fs.writeFile(ext.cssPath, content + '\n' + RTL_CSS_RULES, 'utf-8');
+        messages.push(`  CSS: RTL support added to ${ext.name}`);
+        changed = true;
+    } catch (e: unknown) {
+        const err = e as NodeJS.ErrnoException;
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+            messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
+            messages.push('       Try running with elevated privileges');
+        } else {
+            messages.push(`  CSS: Error: ${err.message}`);
         }
     }
 
@@ -122,32 +124,58 @@ export async function addRtl(ext: ClaudeExtensionInfo): Promise<{ messages: stri
         return { messages, changed };
     }
 
-    if (await isJsInstalled(ext.jsPath)) {
-        messages.push(`  JS:  Button already installed in ${ext.name}`);
-    } else {
-        try {
-            const backupPath = ext.jsPath + '.bak';
-            if (!(await exists(backupPath))) {
-                await fs.copyFile(ext.jsPath, backupPath);
-                messages.push(`  JS:  Backup created: ${backupPath}`);
-            }
+    try {
+        const backupPath = ext.jsPath + '.bak';
 
-            const content = await fs.readFile(ext.jsPath, 'utf-8');
-            await fs.writeFile(ext.jsPath, content + '\n' + RTL_JS_CODE, 'utf-8');
-            messages.push(`  JS:  Toggle button added to ${ext.name}`);
-            changed = true;
-        } catch (e: unknown) {
-            const err = e as NodeJS.ErrnoException;
-            if (err.code === 'EPERM' || err.code === 'EACCES') {
-                messages.push(`  JS:  Permission denied: ${ext.jsPath}`);
-                messages.push('       Try running with elevated privileges');
-            } else {
-                messages.push(`  JS:  Error: ${err.message}`);
-            }
+        if (await exists(backupPath)) {
+            // Backup exists: restore clean file, then re-inject
+            await fs.copyFile(backupPath, ext.jsPath);
+            messages.push(`  JS:  Restored from backup`);
+        } else {
+            // First time: create backup
+            await fs.copyFile(ext.jsPath, backupPath);
+            messages.push(`  JS:  Backup created: ${backupPath}`);
+        }
+
+        const content = await fs.readFile(ext.jsPath, 'utf-8');
+        await fs.writeFile(ext.jsPath, content + '\n' + RTL_JS_CODE, 'utf-8');
+        messages.push(`  JS:  Toggle button added to ${ext.name}`);
+        changed = true;
+    } catch (e: unknown) {
+        const err = e as NodeJS.ErrnoException;
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+            messages.push(`  JS:  Permission denied: ${ext.jsPath}`);
+            messages.push('       Try running with elevated privileges');
+        } else {
+            messages.push(`  JS:  Error: ${err.message}`);
         }
     }
 
     return { messages, changed };
+}
+
+const BIDI_OVERRIDE = '*{direction:ltr;unicode-bidi:bidi-override}';
+
+/**
+ * Add RTL support and fix BiDi issue by removing the bidi-override rule from CSS.
+ * Same as addRtl() but also strips the problematic bidi-override rule.
+ */
+export async function fixBidi(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+    const result = await addRtl(ext);
+
+    // After injection, remove the bidi-override rule from the CSS file
+    try {
+        const content = await fs.readFile(ext.cssPath, 'utf-8');
+        if (content.includes(BIDI_OVERRIDE)) {
+            const fixed = content.replace(BIDI_OVERRIDE, '');
+            await fs.writeFile(ext.cssPath, fixed, 'utf-8');
+            result.messages.push(`  CSS: Removed bidi-override rule`);
+        }
+    } catch (e: unknown) {
+        result.messages.push(`  CSS: Error fixing BiDi: ${(e as Error).message}`);
+    }
+
+    return result;
 }
 
 /**

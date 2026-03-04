@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { findClaudeExtensions } from './finder.js';
-import { addRtl, removeRtl, getStatus } from './injector.js';
+import { addRtl, removeRtl, fixBidi, getStatus } from './injector.js';
 import { createStatusBarItem, updateStatusBar, disposeStatusBar } from './statusBar.js';
 
 let outputChannel: vscode.OutputChannel;
@@ -34,8 +34,31 @@ async function handleAdd(): Promise<void> {
 
     if (anyChanged) {
         vscode.commands.executeCommand('workbench.action.reloadWindow');
-    } else {
-        vscode.window.showInformationMessage('RTL is already active.');
+    }
+}
+
+async function handleFixBidi(): Promise<void> {
+    const extensions = await findClaudeExtensions();
+    if (extensions.length === 0) {
+        vscode.window.showWarningMessage('No Claude Code extensions found.');
+        return;
+    }
+
+    const channel = getOutputChannel();
+    channel.clear();
+    channel.appendLine('Activating RTL support with BiDi fix...\n');
+
+    let anyChanged = false;
+    for (const ext of extensions) {
+        const result = await fixBidi(ext);
+        result.messages.forEach(m => channel.appendLine(m));
+        if (result.changed) anyChanged = true;
+    }
+
+    channel.show(true);
+
+    if (anyChanged) {
+        vscode.commands.executeCommand('workbench.action.reloadWindow');
     }
 }
 
@@ -94,6 +117,7 @@ async function handleStatus(): Promise<void> {
 async function handleShowMenu(): Promise<void> {
     const items: vscode.QuickPickItem[] = [
         { label: '$(check) Activate RTL', description: 'Enable RTL support for Claude Code' },
+        { label: '$(tools) Fix BiDi', description: 'Activate RTL and fix bidirectional text issues' },
         { label: '$(close) Deactivate RTL', description: 'Disable RTL support and restore original files' },
         { label: '$(info) Check Status', description: 'Show current RTL status' },
     ];
@@ -106,6 +130,8 @@ async function handleShowMenu(): Promise<void> {
 
     if (selection.label.includes('Activate')) {
         vscode.commands.executeCommand('claude-rtl.add');
+    } else if (selection.label.includes('Fix BiDi')) {
+        vscode.commands.executeCommand('claude-rtl.fixBidi');
     } else if (selection.label.includes('Deactivate')) {
         vscode.commands.executeCommand('claude-rtl.remove');
     } else if (selection.label.includes('Status')) {
@@ -119,6 +145,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('claude-rtl.add', handleAdd),
+        vscode.commands.registerCommand('claude-rtl.fixBidi', handleFixBidi),
         vscode.commands.registerCommand('claude-rtl.remove', handleRemove),
         vscode.commands.registerCommand('claude-rtl.status', handleStatus),
         vscode.commands.registerCommand('claude-rtl.showMenu', handleShowMenu),
