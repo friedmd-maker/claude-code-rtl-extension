@@ -208,8 +208,8 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('claude-rtl.showMenu', handleShowMenu),
     );
 
-    autoReactivate();
-    updateStatusBar();
+    autoReactivate().catch(err => console.error('RTL auto-reactivation failed:', err));
+    updateStatusBar().catch(err => console.error('RTL status bar update failed:', err));
 }
 
 export function deactivate(): void {
