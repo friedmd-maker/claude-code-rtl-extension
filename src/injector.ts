@@ -9,6 +9,8 @@ import {
     generateAlwaysCssRules, generateAutoCssRules,
 } from './content.js';
 
+const BIDI_OVERRIDE = '*{direction:ltr;unicode-bidi:bidi-override}';
+
 /**
  * Check if a path exists.
  */
@@ -72,7 +74,6 @@ export async function isJsInstalled(jsPath: string | null): Promise<boolean> {
 
 /**
  * Strip a marked block from content string.
- * Equivalent to Python _strip_block().
  */
 function stripBlock(content: string, startMarker: string, endMarker: string): string {
     const startIdx = content.indexOf(startMarker);
@@ -82,13 +83,88 @@ function stripBlock(content: string, startMarker: string, endMarker: string): st
     let actualStart = startIdx;
     const actualEnd = endIdx + endMarker.length;
 
-    // Remove preceding newline if present (matching Python behavior)
+    // Remove preceding newline if present
     if (actualStart > 0 && content[actualStart - 1] === '\n') {
         actualStart -= 1;
     }
 
     return content.substring(0, actualStart) + content.substring(actualEnd);
 }
+
+// ── Injection helpers ─────────────────────────────────────────────
+
+interface InjectionResult {
+    messages: string[];
+    changed: boolean;
+}
+
+/**
+ * Restore a file from backup (or create backup if first time),
+ * then append injected content.
+ */
+async function injectFile(
+    filePath: string,
+    injectedContent: string,
+    label: string,
+    messages: string[],
+    options?: { fixBidi?: boolean },
+): Promise<boolean> {
+    try {
+        const backupPath = filePath + '.bak';
+
+        if (await exists(backupPath)) {
+            await fs.copyFile(backupPath, filePath);
+            messages.push(`  ${label}: Restored from backup`);
+        } else {
+            await fs.copyFile(filePath, backupPath);
+            messages.push(`  ${label}: Backup created: ${backupPath}`);
+        }
+
+        let content = await fs.readFile(filePath, 'utf-8');
+
+        if (options?.fixBidi && content.includes(BIDI_OVERRIDE)) {
+            content = content.replace(BIDI_OVERRIDE, '');
+            messages.push(`  ${label}: Removed bidi-override rule`);
+        }
+
+        await fs.writeFile(filePath, content + '\n' + injectedContent, 'utf-8');
+        return true;
+    } catch (e: unknown) {
+        const err = e as NodeJS.ErrnoException;
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+            messages.push(`  ${label}: Permission denied: ${filePath}`);
+            messages.push('       Try running with elevated privileges');
+        } else {
+            messages.push(`  ${label}: Error: ${err.message}`);
+        }
+        return false;
+    }
+}
+
+/**
+ * Restore a file from backup and delete the backup.
+ * Used when removing JS injection in Always mode.
+ */
+async function restoreAndDeleteBackup(
+    filePath: string,
+    label: string,
+    messages: string[],
+): Promise<boolean> {
+    const backupPath = filePath + '.bak';
+    if (!(await exists(backupPath))) return false;
+
+    try {
+        await fs.copyFile(backupPath, filePath);
+        await fs.unlink(backupPath);
+        messages.push(`  ${label}: Restored from backup (backup deleted)`);
+        return true;
+    } catch (e: unknown) {
+        messages.push(`  ${label}: Error restoring: ${(e as Error).message}`);
+        return false;
+    }
+}
+
+// ── Status ────────────────────────────────────────────────────────
 
 /**
  * Get RTL status for all found extensions.
@@ -113,73 +189,25 @@ export async function getStatus(extensions: ClaudeExtensionInfo[]): Promise<RtlS
     return statuses;
 }
 
+// ── Injection modes ───────────────────────────────────────────────
+
 /**
- * Add RTL support to a single Claude Code extension.
- * Returns an array of status messages.
+ * Add RTL support (Active mode) — CSS with .YBYrtl class + toggle button JS.
  */
-export async function addRtl(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+export async function addRtl(ext: ClaudeExtensionInfo): Promise<InjectionResult> {
     const messages: string[] = [];
     let changed = false;
 
-    // --- CSS ---
-    try {
-        const backupPath = ext.cssPath + '.bak';
-
-        if (await exists(backupPath)) {
-            // Backup exists: restore clean file, then re-inject
-            await fs.copyFile(backupPath, ext.cssPath);
-            messages.push(`  CSS: Restored from backup`);
-        } else {
-            // First time: create backup
-            await fs.copyFile(ext.cssPath, backupPath);
-            messages.push(`  CSS: Backup created: ${backupPath}`);
-        }
-
-        const content = await fs.readFile(ext.cssPath, 'utf-8');
-        await fs.writeFile(ext.cssPath, content + '\n' + RTL_CSS_RULES, 'utf-8');
+    if (await injectFile(ext.cssPath, RTL_CSS_RULES, 'CSS', messages)) {
         messages.push(`  CSS: RTL support added to ${ext.name}`);
         changed = true;
-    } catch (e: unknown) {
-        const err = e as NodeJS.ErrnoException;
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-            messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
-            messages.push('       Try running with elevated privileges');
-        } else {
-            messages.push(`  CSS: Error: ${err.message}`);
-        }
     }
 
-    // --- JS ---
     if (!ext.jsPath) {
         messages.push('  JS:  index.js not found, skipping button injection');
-        return { messages, changed };
-    }
-
-    try {
-        const backupPath = ext.jsPath + '.bak';
-
-        if (await exists(backupPath)) {
-            // Backup exists: restore clean file, then re-inject
-            await fs.copyFile(backupPath, ext.jsPath);
-            messages.push(`  JS:  Restored from backup`);
-        } else {
-            // First time: create backup
-            await fs.copyFile(ext.jsPath, backupPath);
-            messages.push(`  JS:  Backup created: ${backupPath}`);
-        }
-
-        const content = await fs.readFile(ext.jsPath, 'utf-8');
-        await fs.writeFile(ext.jsPath, content + '\n' + RTL_JS_CODE, 'utf-8');
+    } else if (await injectFile(ext.jsPath, RTL_JS_CODE, 'JS', messages)) {
         messages.push(`  JS:  Toggle button added to ${ext.name}`);
         changed = true;
-    } catch (e: unknown) {
-        const err = e as NodeJS.ErrnoException;
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-            messages.push(`  JS:  Permission denied: ${ext.jsPath}`);
-            messages.push('       Try running with elevated privileges');
-        } else {
-            messages.push(`  JS:  Error: ${err.message}`);
-        }
     }
 
     return { messages, changed };
@@ -187,57 +215,20 @@ export async function addRtl(ext: ClaudeExtensionInfo): Promise<{ messages: stri
 
 /**
  * Add RTL "Always" mode — CSS without .YBYrtl class, no JS button.
- * Handles transitions from any state (Inactive, Active, Always).
  */
-export async function addRtlAlways(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+export async function addRtlAlways(ext: ClaudeExtensionInfo): Promise<InjectionResult> {
     const messages: string[] = [];
     let changed = false;
 
-    // --- CSS: restore from backup and inject "always" version ---
-    try {
-        const backupPath = ext.cssPath + '.bak';
-
-        if (await exists(backupPath)) {
-            await fs.copyFile(backupPath, ext.cssPath);
-            messages.push(`  CSS: Restored from backup`);
-        } else {
-            await fs.copyFile(ext.cssPath, backupPath);
-            messages.push(`  CSS: Backup created: ${backupPath}`);
-        }
-
-        let content = await fs.readFile(ext.cssPath, 'utf-8');
-
-        // Fix bidi-override if present (some Claude Code versions have this)
-        if (content.includes(BIDI_OVERRIDE)) {
-            content = content.replace(BIDI_OVERRIDE, '');
-            messages.push(`  CSS: Removed bidi-override rule`);
-        }
-
-        await fs.writeFile(ext.cssPath, content + '\n' + generateAlwaysCssRules(), 'utf-8');
+    if (await injectFile(ext.cssPath, generateAlwaysCssRules(), 'CSS', messages, { fixBidi: true })) {
         messages.push(`  CSS: RTL Always support added to ${ext.name}`);
         changed = true;
-    } catch (e: unknown) {
-        const err = e as NodeJS.ErrnoException;
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-            messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
-            messages.push('       Try running with elevated privileges');
-        } else {
-            messages.push(`  CSS: Error: ${err.message}`);
-        }
     }
 
-    // --- JS: remove button if installed (restore from backup, delete .bak) ---
+    // Remove JS button if installed
     if (ext.jsPath && await isJsInstalled(ext.jsPath)) {
-        try {
-            const backupPath = ext.jsPath + '.bak';
-            if (await exists(backupPath)) {
-                await fs.copyFile(backupPath, ext.jsPath);
-                await fs.unlink(backupPath);
-                messages.push(`  JS:  Toggle button removed (backup deleted)`);
-                changed = true;
-            }
-        } catch (e: unknown) {
-            messages.push(`  JS:  Error removing button: ${(e as Error).message}`);
+        if (await restoreAndDeleteBackup(ext.jsPath, 'JS', messages)) {
+            changed = true;
         }
     } else {
         messages.push(`  JS:  No button to remove (Always mode — no JS needed)`);
@@ -248,91 +239,36 @@ export async function addRtlAlways(ext: ClaudeExtensionInfo): Promise<{ messages
 
 /**
  * Add RTL "Auto" mode — per-element Hebrew detection via JS MutationObserver.
- * CSS sets up plaintext bidi, JS sets direction based on Hebrew character presence.
  */
-export async function addRtlAuto(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+export async function addRtlAuto(ext: ClaudeExtensionInfo): Promise<InjectionResult> {
     const messages: string[] = [];
     let changed = false;
 
-    // --- CSS: restore from backup and inject "auto" version ---
-    try {
-        const backupPath = ext.cssPath + '.bak';
-
-        if (await exists(backupPath)) {
-            await fs.copyFile(backupPath, ext.cssPath);
-            messages.push(`  CSS: Restored from backup`);
-        } else {
-            await fs.copyFile(ext.cssPath, backupPath);
-            messages.push(`  CSS: Backup created: ${backupPath}`);
-        }
-
-        let content = await fs.readFile(ext.cssPath, 'utf-8');
-
-        // Fix bidi-override if present (some Claude Code versions have this)
-        if (content.includes(BIDI_OVERRIDE)) {
-            content = content.replace(BIDI_OVERRIDE, '');
-            messages.push(`  CSS: Removed bidi-override rule`);
-        }
-
-        await fs.writeFile(ext.cssPath, content + '\n' + generateAutoCssRules(), 'utf-8');
+    if (await injectFile(ext.cssPath, generateAutoCssRules(), 'CSS', messages, { fixBidi: true })) {
         messages.push(`  CSS: RTL Auto support added to ${ext.name}`);
         changed = true;
-    } catch (e: unknown) {
-        const err = e as NodeJS.ErrnoException;
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-            messages.push(`  CSS: Permission denied: ${ext.cssPath}`);
-            messages.push('       Try running with elevated privileges');
-        } else {
-            messages.push(`  CSS: Error: ${err.message}`);
-        }
     }
 
-    // --- JS: restore from backup and inject auto-detection script ---
     if (!ext.jsPath) {
         messages.push('  JS:  index.js not found, skipping auto-detection injection');
-        return { messages, changed };
-    }
-
-    try {
-        const backupPath = ext.jsPath + '.bak';
-
-        if (await exists(backupPath)) {
-            await fs.copyFile(backupPath, ext.jsPath);
-            messages.push(`  JS:  Restored from backup`);
-        } else {
-            await fs.copyFile(ext.jsPath, backupPath);
-            messages.push(`  JS:  Backup created: ${backupPath}`);
-        }
-
-        const content = await fs.readFile(ext.jsPath, 'utf-8');
-        await fs.writeFile(ext.jsPath, content + '\n' + RTL_AUTO_JS_CODE, 'utf-8');
+    } else if (await injectFile(ext.jsPath, RTL_AUTO_JS_CODE, 'JS', messages)) {
         messages.push(`  JS:  Auto-detection script added to ${ext.name}`);
         changed = true;
-    } catch (e: unknown) {
-        const err = e as NodeJS.ErrnoException;
-        if (err.code === 'EPERM' || err.code === 'EACCES') {
-            messages.push(`  JS:  Permission denied: ${ext.jsPath}`);
-            messages.push('       Try running with elevated privileges');
-        } else {
-            messages.push(`  JS:  Error: ${err.message}`);
-        }
     }
 
     return { messages, changed };
 }
 
-const BIDI_OVERRIDE = '*{direction:ltr;unicode-bidi:bidi-override}';
-
 /**
- * Add RTL support and fix BiDi issue by removing the bidi-override rule from CSS.
- * Preserves the current mode: if in Always mode stays Always, otherwise uses Active.
+ * Add RTL support and fix BiDi issue by removing the bidi-override rule.
+ * Preserves the current mode.
  */
-export async function fixBidi(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+export async function fixBidi(ext: ClaudeExtensionInfo): Promise<InjectionResult> {
     const currentlyAuto = await isAutoMode(ext.cssPath);
     const currentlyAlways = !currentlyAuto && await isAlwaysMode(ext.cssPath);
     const result = currentlyAuto ? await addRtlAuto(ext) : currentlyAlways ? await addRtlAlways(ext) : await addRtl(ext);
 
-    // After injection, remove the bidi-override rule from the CSS file
+    // After injection, remove the bidi-override rule if still present
     try {
         const content = await fs.readFile(ext.cssPath, 'utf-8');
         if (content.includes(BIDI_OVERRIDE)) {
@@ -347,76 +283,60 @@ export async function fixBidi(ext: ClaudeExtensionInfo): Promise<{ messages: str
     return result;
 }
 
+// ── Removal ───────────────────────────────────────────────────────
+
+/**
+ * Remove an injected block from a file, trying backup restore first,
+ * falling back to manual marker-based removal.
+ */
+async function removeInjected(
+    filePath: string,
+    isInstalled: boolean,
+    startMarker: string,
+    endMarker: string,
+    label: string,
+    extName: string,
+    messages: string[],
+): Promise<boolean> {
+    if (!isInstalled) {
+        messages.push(`  ${label}: RTL not installed in ${extName}`);
+        return false;
+    }
+
+    // Try backup restore first
+    if (await restoreAndDeleteBackup(filePath, label, messages)) {
+        return true;
+    }
+
+    // Fallback: manual marker removal
+    try {
+        const content = await fs.readFile(filePath, 'utf-8');
+        const cleaned = stripBlock(content, startMarker, endMarker);
+        await fs.writeFile(filePath, cleaned, 'utf-8');
+        messages.push(`  ${label}: RTL removed from ${extName}`);
+        return true;
+    } catch (e: unknown) {
+        messages.push(`  ${label}: Error removing RTL: ${(e as Error).message}`);
+        return false;
+    }
+}
+
 /**
  * Remove RTL support from a single Claude Code extension.
- * Returns an array of status messages.
  */
-export async function removeRtl(ext: ClaudeExtensionInfo): Promise<{ messages: string[]; changed: boolean }> {
+export async function removeRtl(ext: ClaudeExtensionInfo): Promise<InjectionResult> {
     const messages: string[] = [];
     let changed = false;
 
-    // --- CSS ---
-    if (!(await isCssInstalled(ext.cssPath))) {
-        messages.push(`  CSS: RTL not installed in ${ext.name}`);
-    } else {
-        const backupPath = ext.cssPath + '.bak';
-        let restored = false;
-
-        if (await exists(backupPath)) {
-            try {
-                await fs.copyFile(backupPath, ext.cssPath);
-                await fs.unlink(backupPath);
-                messages.push(`  CSS: Restored from backup: ${ext.name}`);
-                restored = true;
-                changed = true;
-            } catch (e: unknown) {
-                messages.push(`  CSS: Backup restore failed: ${(e as Error).message}, trying manual removal...`);
-            }
-        }
-
-        if (!restored) {
-            try {
-                const content = await fs.readFile(ext.cssPath, 'utf-8');
-                const cleaned = stripBlock(content, RTL_START_MARKER, RTL_END_MARKER);
-                await fs.writeFile(ext.cssPath, cleaned, 'utf-8');
-                messages.push(`  CSS: RTL removed from ${ext.name}`);
-                changed = true;
-            } catch (e: unknown) {
-                messages.push(`  CSS: Error removing RTL: ${(e as Error).message}`);
-            }
-        }
+    if (await removeInjected(ext.cssPath, await isCssInstalled(ext.cssPath), RTL_START_MARKER, RTL_END_MARKER, 'CSS', ext.name, messages)) {
+        changed = true;
     }
 
-    // --- JS ---
-    if (!ext.jsPath || !(await isJsInstalled(ext.jsPath))) {
+    const jsInstalled = ext.jsPath ? await isJsInstalled(ext.jsPath) : false;
+    if (!ext.jsPath || !jsInstalled) {
         messages.push(`  JS:  Button not installed in ${ext.name}`);
-    } else {
-        const backupPath = ext.jsPath + '.bak';
-        let restored = false;
-
-        if (await exists(backupPath)) {
-            try {
-                await fs.copyFile(backupPath, ext.jsPath);
-                await fs.unlink(backupPath);
-                messages.push(`  JS:  Restored from backup: ${ext.name}`);
-                restored = true;
-                changed = true;
-            } catch (e: unknown) {
-                messages.push(`  JS:  Backup restore failed: ${(e as Error).message}, trying manual removal...`);
-            }
-        }
-
-        if (!restored) {
-            try {
-                const content = await fs.readFile(ext.jsPath, 'utf-8');
-                const cleaned = stripBlock(content, JS_START_MARKER, JS_END_MARKER);
-                await fs.writeFile(ext.jsPath, cleaned, 'utf-8');
-                messages.push(`  JS:  Toggle button removed from ${ext.name}`);
-                changed = true;
-            } catch (e: unknown) {
-                messages.push(`  JS:  Error removing button: ${(e as Error).message}`);
-            }
-        }
+    } else if (await removeInjected(ext.jsPath, jsInstalled, JS_START_MARKER, JS_END_MARKER, 'JS', ext.name, messages)) {
+        changed = true;
     }
 
     return { messages, changed };

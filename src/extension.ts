@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { RtlMode } from './types.js';
+import { ClaudeExtensionInfo, RtlMode } from './types.js';
 import { findClaudeExtensions } from './finder.js';
 import { addRtl, addRtlAlways, addRtlAuto, removeRtl, fixBidi, getStatus } from './injector.js';
 import { createStatusBarItem, updateStatusBar, disposeStatusBar } from './statusBar.js';
@@ -24,7 +24,13 @@ function getSavedMode(): RtlMode {
     return globalState.get<RtlMode>(STATE_MODE_KEY, 'inactive');
 }
 
-async function handleAdd(): Promise<void> {
+type InjectionAction = (ext: ClaudeExtensionInfo) => Promise<{ messages: string[]; changed: boolean }>;
+
+async function handleMode(
+    label: string,
+    mode: RtlMode,
+    action: InjectionAction,
+): Promise<void> {
     const extensions = await findClaudeExtensions();
     if (extensions.length === 0) {
         vscode.window.showWarningMessage('No Claude Code extensions found.');
@@ -33,69 +39,17 @@ async function handleAdd(): Promise<void> {
 
     const channel = getOutputChannel();
     channel.clear();
-    channel.appendLine('Activating RTL support...\n');
+    channel.appendLine(`${label}...\n`);
 
     let anyChanged = false;
     for (const ext of extensions) {
-        const result = await addRtl(ext);
+        const result = await action(ext);
         result.messages.forEach(m => channel.appendLine(m));
         if (result.changed) anyChanged = true;
     }
 
     channel.show(true);
-    await saveMode('active');
-
-    if (anyChanged) {
-        vscode.commands.executeCommand('workbench.action.reloadWindow');
-    }
-}
-
-async function handleAddAlways(): Promise<void> {
-    const extensions = await findClaudeExtensions();
-    if (extensions.length === 0) {
-        vscode.window.showWarningMessage('No Claude Code extensions found.');
-        return;
-    }
-
-    const channel = getOutputChannel();
-    channel.clear();
-    channel.appendLine('Activating RTL Always mode...\n');
-
-    let anyChanged = false;
-    for (const ext of extensions) {
-        const result = await addRtlAlways(ext);
-        result.messages.forEach(m => channel.appendLine(m));
-        if (result.changed) anyChanged = true;
-    }
-
-    channel.show(true);
-    await saveMode('always');
-
-    if (anyChanged) {
-        vscode.commands.executeCommand('workbench.action.reloadWindow');
-    }
-}
-
-async function handleAddAuto(): Promise<void> {
-    const extensions = await findClaudeExtensions();
-    if (extensions.length === 0) {
-        vscode.window.showWarningMessage('No Claude Code extensions found.');
-        return;
-    }
-
-    const channel = getOutputChannel();
-    channel.clear();
-    channel.appendLine('Activating RTL Auto mode...\n');
-
-    let anyChanged = false;
-    for (const ext of extensions) {
-        const result = await addRtlAuto(ext);
-        result.messages.forEach(m => channel.appendLine(m));
-        if (result.changed) anyChanged = true;
-    }
-
-    channel.show(true);
-    await saveMode('auto');
+    await saveMode(mode);
 
     if (anyChanged) {
         vscode.commands.executeCommand('workbench.action.reloadWindow');
@@ -103,34 +57,10 @@ async function handleAddAuto(): Promise<void> {
 }
 
 async function handleFixBidi(): Promise<void> {
-    const extensions = await findClaudeExtensions();
-    if (extensions.length === 0) {
-        vscode.window.showWarningMessage('No Claude Code extensions found.');
-        return;
-    }
-
-    const channel = getOutputChannel();
-    channel.clear();
-    channel.appendLine('Activating RTL support with BiDi fix...\n');
-
-    let anyChanged = false;
-    for (const ext of extensions) {
-        const result = await fixBidi(ext);
-        result.messages.forEach(m => channel.appendLine(m));
-        if (result.changed) anyChanged = true;
-    }
-
-    channel.show(true);
-
     // fixBidi preserves current mode; if was inactive, it activates as 'active'
     const currentSaved = getSavedMode();
-    if (currentSaved === 'inactive') {
-        await saveMode('active');
-    }
-
-    if (anyChanged) {
-        vscode.commands.executeCommand('workbench.action.reloadWindow');
-    }
+    const mode = currentSaved === 'inactive' ? 'active' : currentSaved;
+    await handleMode('Activating RTL support with BiDi fix', mode, fixBidi);
 }
 
 async function handleRemove(): Promise<void> {
@@ -211,6 +141,21 @@ async function handleShowMenu(): Promise<void> {
     }
 }
 
+const MODE_ACTIONS: Record<string, InjectionAction> = {
+    active: addRtl,
+    always: addRtlAlways,
+    auto: addRtlAuto,
+};
+
+async function silentInject(extensions: ClaudeExtensionInfo[], action: InjectionAction): Promise<boolean> {
+    let anyChanged = false;
+    for (const ext of extensions) {
+        const result = await action(ext);
+        if (result.changed) anyChanged = true;
+    }
+    return anyChanged;
+}
+
 /**
  * Auto-reactivate RTL if needed.
  * Runs silently on every activation to ensure RTL stays injected
@@ -226,13 +171,7 @@ async function autoReactivate(): Promise<void> {
         const extensions = await findClaudeExtensions();
         if (extensions.length === 0) return;
 
-        let anyChanged = false;
-        for (const ext of extensions) {
-            const result = await addRtl(ext);
-            if (result.changed) anyChanged = true;
-        }
-
-        if (anyChanged) {
+        if (await silentInject(extensions, addRtl)) {
             vscode.commands.executeCommand('workbench.action.reloadWindow');
         }
         return;
@@ -247,18 +186,8 @@ async function autoReactivate(): Promise<void> {
     const needsReinjection = statuses.some(s => s.mode !== savedMode);
     if (!needsReinjection) return;
 
-    // Silently re-inject based on saved mode
-    let anyChanged = false;
-    for (const ext of extensions) {
-        const result = savedMode === 'auto'
-            ? await addRtlAuto(ext)
-            : savedMode === 'always'
-            ? await addRtlAlways(ext)
-            : await addRtl(ext);
-        if (result.changed) anyChanged = true;
-    }
-
-    if (anyChanged) {
+    const action = MODE_ACTIONS[savedMode];
+    if (action && await silentInject(extensions, action)) {
         vscode.commands.executeCommand('workbench.action.reloadWindow');
     }
 }
@@ -270,9 +199,9 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(statusBar);
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('claude-rtl.add', handleAdd),
-        vscode.commands.registerCommand('claude-rtl.addAlways', handleAddAlways),
-        vscode.commands.registerCommand('claude-rtl.addAuto', handleAddAuto),
+        vscode.commands.registerCommand('claude-rtl.add', () => handleMode('Activating RTL support', 'active', addRtl)),
+        vscode.commands.registerCommand('claude-rtl.addAlways', () => handleMode('Activating RTL Always mode', 'always', addRtlAlways)),
+        vscode.commands.registerCommand('claude-rtl.addAuto', () => handleMode('Activating RTL Auto mode', 'auto', addRtlAuto)),
         vscode.commands.registerCommand('claude-rtl.fixBidi', handleFixBidi),
         vscode.commands.registerCommand('claude-rtl.remove', handleRemove),
         vscode.commands.registerCommand('claude-rtl.status', handleStatus),
