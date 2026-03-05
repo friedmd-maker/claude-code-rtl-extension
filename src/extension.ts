@@ -188,34 +188,26 @@ async function handleStatus(): Promise<void> {
     await updateStatusBar();
 }
 
+interface MenuAction extends vscode.QuickPickItem {
+    command: string;
+}
+
 async function handleShowMenu(): Promise<void> {
-    const items: vscode.QuickPickItem[] = [
-        { label: '$(check) Activate RTL', description: 'Enable RTL support with toggle button' },
-        { label: '$(pin) Activate RTL (Always)', description: 'Enable RTL permanently without toggle button' },
-        { label: '$(eye) Activate RTL (Auto)', description: 'Auto-detect Hebrew per paragraph and set direction' },
-        { label: '$(tools) Fix BiDi', description: 'Activate RTL and fix bidirectional text issues' },
-        { label: '$(close) Deactivate RTL', description: 'Disable RTL support and restore original files' },
-        { label: '$(info) Check Status', description: 'Show current RTL status' },
+    const items: MenuAction[] = [
+        { label: '$(check) Activate RTL', description: 'Enable RTL support with toggle button', command: 'claude-rtl.add' },
+        { label: '$(pin) Activate RTL (Always)', description: 'Enable RTL permanently without toggle button', command: 'claude-rtl.addAlways' },
+        { label: '$(eye) Activate RTL (Auto)', description: 'Auto-detect Hebrew per paragraph and set direction', command: 'claude-rtl.addAuto' },
+        { label: '$(tools) Fix BiDi', description: 'Activate RTL and fix bidirectional text issues', command: 'claude-rtl.fixBidi' },
+        { label: '$(close) Deactivate RTL', description: 'Disable RTL support and restore original files', command: 'claude-rtl.remove' },
+        { label: '$(info) Check Status', description: 'Show current RTL status', command: 'claude-rtl.status' },
     ];
 
     const selection = await vscode.window.showQuickPick(items, {
         placeHolder: 'Claude Code RTL Support',
     });
 
-    if (!selection) return;
-
-    if (selection.label.includes('Auto')) {
-        vscode.commands.executeCommand('claude-rtl.addAuto');
-    } else if (selection.label.includes('Always')) {
-        vscode.commands.executeCommand('claude-rtl.addAlways');
-    } else if (selection.label.includes('Activate')) {
-        vscode.commands.executeCommand('claude-rtl.add');
-    } else if (selection.label.includes('Fix BiDi')) {
-        vscode.commands.executeCommand('claude-rtl.fixBidi');
-    } else if (selection.label.includes('Deactivate')) {
-        vscode.commands.executeCommand('claude-rtl.remove');
-    } else if (selection.label.includes('Status')) {
-        vscode.commands.executeCommand('claude-rtl.status');
+    if (selection) {
+        vscode.commands.executeCommand(selection.command);
     }
 }
 
