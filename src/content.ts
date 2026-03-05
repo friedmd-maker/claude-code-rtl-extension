@@ -17,11 +17,11 @@ export const RTL_MODE_ACTIVE_MARKER = '/* RTL-MODE: active */';
 export const RTL_MODE_ALWAYS_MARKER = '/* RTL-MODE: always */';
 export const RTL_MODE_AUTO_MARKER = '/* RTL-MODE: auto */';
 
-/** RTL CSS rules to inject — identical to Python RTL_CSS_RULES */
-export const RTL_CSS_RULES = `
-/* RTL Text Support for Claude Code VS Code / Cursor Extension - Added by script */
-/* RTL-MODE: active */
+// ── CSS Building Blocks ───────────────────────────────────────────
 
+const P = '.YBYrtl '; // selector prefix for scoped modes (Active/Auto)
+
+const BUTTON_STYLES = `
 /* ==========================================
    Toggle button - always visible
    ========================================== */
@@ -49,18 +49,22 @@ export const RTL_CSS_RULES = `
     opacity: 1;
     background: var(--vscode-button-background, rgba(128, 128, 128, 0.3));
 }
+`;
 
+/** RTL content rules — prefix is prepended to each selector */
+function rtlContentRules(p: string): string {
+    return `
 /* ==========================================
    RTL - Hebrew/Arabic content (active when .YBYrtl is on #root)
    ========================================== */
 
 /* Messages container + user messages */
-.YBYrtl [class*="messagesContainer_"] {
+${p}[class*="messagesContainer_"] {
     direction: rtl;
 }
 
-.YBYrtl [class*="userMessage_"],
-.YBYrtl [class*="userMessageContainer_"] {
+${p}[class*="userMessage_"],
+${p}[class*="userMessageContainer_"] {
     direction: rtl;
     unicode-bidi: plaintext;
     text-align: right !important;
@@ -69,120 +73,197 @@ export const RTL_CSS_RULES = `
     margin-right: 0 !important;
 }
 
-.YBYrtl [class*="content_"][class*="xGDvVg"],
-.YBYrtl [class*="content_"] > span {
+${p}[class*="content_"][class*="xGDvVg"],
+${p}[class*="content_"] > span {
     unicode-bidi: plaintext;
 }
 
 /* Claude's markdown responses (excluding thinking block) */
-.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
+${p}[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
     direction: rtl;
     unicode-bidi: plaintext;
 }
 
-.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
-.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
+${p}[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
+${p}[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
     text-align: right;
 }
 
-.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) a {
+${p}[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) a {
     unicode-bidi: plaintext;
 }
 
 /* Question/answer blocks */
-.YBYrtl [class*="questionBlock_"],
-.YBYrtl [class*="questionHeader_"],
-.YBYrtl [class*="answerText_"],
-.YBYrtl [class*="optionText_"],
-.YBYrtl [class*="optionContent_"] {
+${p}[class*="questionBlock_"],
+${p}[class*="questionHeader_"],
+${p}[class*="answerText_"],
+${p}[class*="optionText_"],
+${p}[class*="optionContent_"] {
     direction: rtl;
     unicode-bidi: plaintext;
 }
 
 /* Prompt input — auto-detect direction by first character */
-.YBYrtl [class*="messageInput_"] {
+${p}[class*="messageInput_"] {
     unicode-bidi: plaintext;
     text-align: start;
 }
+`;
+}
 
+/** LTR override rules — prefix is prepended to each selector */
+function ltrOverrideRules(p: string): string {
+    return `
 /* ==========================================
    LTR overrides - Code, Tools, UI
    ========================================== */
 
-.YBYrtl [class*="slashCommandMessage_"],
-.YBYrtl [class*="slashCommandResultMessage_"],
-.YBYrtl [class*="header_"][class*="aqhumA"],
-.YBYrtl [class*="sessionsButtonText_"],
-.YBYrtl [class*="dotSuccess_"],
-.YBYrtl [class*="dotFailure_"],
-.YBYrtl [class*="dotProgress_"],
-.YBYrtl [class*="dotWarning_"],
-.YBYrtl [class*="progressContent_"],
-.YBYrtl [class*="inputContainer_"][class*="cKsPxg"],
-.YBYrtl [class*="inputWrapper_"],
-.YBYrtl [class*="iconButton_"],
-.YBYrtl [class*="copyButton_"],
-.YBYrtl [class*="actionButton_"],
-.YBYrtl [class*="selectionAttachment_"],
-.YBYrtl [class*="attachmentInfo_"],
-.YBYrtl [class*="attachmentText_"],
-.YBYrtl [class*="permissionRequest"],
-.YBYrtl [class*="errorMessage_"],
-.YBYrtl [class*="secondaryLine_"],
-.YBYrtl [class*="todoListContainer_"],
-.YBYrtl [class*="todoList_"],
-.YBYrtl [class*="todoItem_"],
-.YBYrtl [class*="auth_"],
-.YBYrtl [class*="authUrl"] {
+${p}[class*="slashCommandMessage_"],
+${p}[class*="slashCommandResultMessage_"],
+${p}[class*="header_"][class*="aqhumA"],
+${p}[class*="sessionsButtonText_"],
+${p}[class*="dotSuccess_"],
+${p}[class*="dotFailure_"],
+${p}[class*="dotProgress_"],
+${p}[class*="dotWarning_"],
+${p}[class*="progressContent_"],
+${p}[class*="inputContainer_"][class*="cKsPxg"],
+${p}[class*="inputWrapper_"],
+${p}[class*="iconButton_"],
+${p}[class*="copyButton_"],
+${p}[class*="actionButton_"],
+${p}[class*="selectionAttachment_"],
+${p}[class*="attachmentInfo_"],
+${p}[class*="attachmentText_"],
+${p}[class*="permissionRequest"],
+${p}[class*="errorMessage_"],
+${p}[class*="secondaryLine_"],
+${p}[class*="todoListContainer_"],
+${p}[class*="todoList_"],
+${p}[class*="todoItem_"],
+${p}[class*="auth_"],
+${p}[class*="authUrl"] {
     direction: ltr !important;
 }
 
 /* Code blocks - LTR + alignment */
-.YBYrtl pre,
-.YBYrtl code,
-.YBYrtl [class*="codeBlockWrapper_"] {
+${p}pre,
+${p}code,
+${p}[class*="codeBlockWrapper_"] {
     direction: ltr !important;
     unicode-bidi: isolate !important;
     text-align: left !important;
 }
 
 /* Tool containers - LTR + alignment */
-.YBYrtl [class*="toolUse_"],
-.YBYrtl [class*="toolSummary_"],
-.YBYrtl [class*="toolBody_"],
-.YBYrtl [class*="toolBodyGrid_"],
-.YBYrtl [class*="toolBodyRow_"],
-.YBYrtl [class*="toolBodyRowContent_"],
-.YBYrtl [class*="toolBodyRowLabel_"],
-.YBYrtl [class*="toolResult_"],
-.YBYrtl [class*="toolNameText_"],
-.YBYrtl [class*="toolReference_"] {
+${p}[class*="toolUse_"],
+${p}[class*="toolSummary_"],
+${p}[class*="toolBody_"],
+${p}[class*="toolBodyGrid_"],
+${p}[class*="toolBodyRow_"],
+${p}[class*="toolBodyRowContent_"],
+${p}[class*="toolBodyRowLabel_"],
+${p}[class*="toolResult_"],
+${p}[class*="toolNameText_"],
+${p}[class*="toolReference_"] {
     direction: ltr !important;
     unicode-bidi: isolate !important;
     text-align: left !important;
 }
 
 /* Thinking block - LTR + alignment */
-.YBYrtl [class*="thinking_"],
-.YBYrtl [class*="thinkingContent_"],
-.YBYrtl [class*="thinkingContainer_"],
-.YBYrtl [class*="thinkingHeader_"],
-.YBYrtl [class*="spinnerRow_"],
-.YBYrtl [class*="timelineMessage_"]:has([class*="thinking_"]) {
+${p}[class*="thinking_"],
+${p}[class*="thinkingContent_"],
+${p}[class*="thinkingContainer_"],
+${p}[class*="thinkingHeader_"],
+${p}[class*="spinnerRow_"],
+${p}[class*="timelineMessage_"]:has([class*="thinking_"]) {
     direction: ltr !important;
     unicode-bidi: isolate !important;
     text-align: left !important;
 }
 
-.YBYrtl [class*="thinkingContent_"] [class*="root_"] :is(ul, ol, li) {
+${p}[class*="thinkingContent_"] [class*="root_"] :is(ul, ol, li) {
     direction: ltr !important;
     text-align: left !important;
 }
+`;
+}
 
-/* End RTL Text Support for Claude Code VS Code / Cursor Extension */
+/** Auto mode self-matching rules (.YBYrtl on the bubble itself, not on #root) */
+const AUTO_SELF_RULES = `
+/* Auto mode — self-matching rules for .YBYrtl on the bubble itself */
+.YBYrtl[class*="userMessage_"],
+.YBYrtl[class*="userMessageContainer_"] {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: right !important;
+    align-items: flex-end !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
+    direction: rtl;
+    unicode-bidi: plaintext;
+}
+
+.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
+.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
+    text-align: right;
+}
+
+/* Prompt input — no .YBYrtl ancestor in Auto mode, so target directly */
+[class*="messageInput_"] {
+    unicode-bidi: plaintext;
+    text-align: start;
+}
 `;
 
-/** RTL JS toggle button code — identical to Python RTL_JS_CODE */
+// ── CSS Assembly ──────────────────────────────────────────────────
+
+function assembleCss(modeMarker: string, parts: string[]): string {
+    return `
+${RTL_START_MARKER}
+${modeMarker}
+${parts.join('\n')}
+${RTL_END_MARKER}
+`;
+}
+
+/** Active mode — .YBYrtl prefix + toggle button */
+export const RTL_CSS_RULES = assembleCss(RTL_MODE_ACTIVE_MARKER, [
+    BUTTON_STYLES,
+    rtlContentRules(P),
+    ltrOverrideRules(P),
+]);
+
+/** Always mode — no prefix, no button */
+export function generateAlwaysCssRules(): string {
+    return assembleCss(RTL_MODE_ALWAYS_MARKER, [
+        rtlContentRules(''),
+        ltrOverrideRules(''),
+    ]);
+}
+
+/** Auto mode — .YBYrtl prefix (on bubble, not root) + auto self-matching rules, no button, no messagesContainer */
+export function generateAutoCssRules(): string {
+    // Use prefixed rules but remove messagesContainer (not needed in auto — .YBYrtl is on individual bubbles)
+    const contentRules = rtlContentRules(P).replace(
+        /\/\* Messages container \+ user messages \*\/\n.YBYrtl \[class\*="messagesContainer_"\] \{[^}]*\}\n\n/,
+        '/* Messages container — skipped in Auto mode (class is on bubble, not root) */\n\n',
+    );
+
+    return assembleCss(RTL_MODE_AUTO_MARKER, [
+        contentRules,
+        ltrOverrideRules(P),
+        AUTO_SELF_RULES,
+    ]);
+}
+
+// ── JavaScript ────────────────────────────────────────────────────
+
+/** RTL JS toggle button code */
 export const RTL_JS_CODE = `
 /* RTL Toggle Button - Added by script */
 (function() {
@@ -224,8 +305,7 @@ export const RTL_JS_CODE = `
 /* End RTL Toggle Button */
 `;
 
-/** Auto-mode JS — scans bubbles for Hebrew and adds .YBYrtl class.
- *  CSS (with .YBYrtl prefix) handles the rest. */
+/** Auto-mode JS — scans bubbles for Hebrew and adds .YBYrtl class */
 export const RTL_AUTO_JS_CODE = `
 /* RTL Toggle Button - Added by script */
 (function() {
@@ -279,89 +359,3 @@ export const RTL_AUTO_JS_CODE = `
 })();
 /* End RTL Toggle Button */
 `;
-
-/**
- * Generate CSS rules without `.YBYrtl` class dependency and no button styles.
- * Used by both "Always" and "Auto" modes — only the marker differs.
- */
-function generateBaseCssRules(modeMarker: string): string {
-    let css = RTL_CSS_RULES;
-
-    // Replace mode marker
-    css = css.replace(RTL_MODE_ACTIVE_MARKER, modeMarker);
-
-    // Remove button styling section
-    css = css.replace(
-        /\/\* =+\s*\n\s*Toggle button - always visible\s*\n\s*=+ \*\/[\s\S]*?#yby-rtl-btn\.yby-active\s*\{[^}]*\}/,
-        '',
-    );
-
-    // Remove `.YBYrtl ` prefix from all selectors
-    css = css.replace(/\.YBYrtl\s+/g, '');
-
-    return css;
-}
-
-/**
- * Generate CSS rules for "Always" mode.
- */
-export function generateAlwaysCssRules(): string {
-    return generateBaseCssRules(RTL_MODE_ALWAYS_MARKER);
-}
-
-/**
- * Generate CSS rules for "Auto" mode — keeps `.YBYrtl` prefix (like Active),
- * removes button styles and messagesContainer rule.
- * JS will add `.YBYrtl` class per-bubble based on Hebrew detection.
- */
-export function generateAutoCssRules(): string {
-    let css = RTL_CSS_RULES;
-
-    // Replace mode marker
-    css = css.replace(RTL_MODE_ACTIVE_MARKER, RTL_MODE_AUTO_MARKER);
-
-    // Remove button styling section
-    css = css.replace(
-        /\/\* =+\s*\n\s*Toggle button - always visible\s*\n\s*=+ \*\/[\s\S]*?#yby-rtl-btn\.yby-active\s*\{[^}]*\}/,
-        '',
-    );
-
-    // Remove messagesContainer rule (not needed — .YBYrtl is on individual bubbles, not on root)
-    css = css.replace(
-        /\.YBYrtl\s+\[class\*="messagesContainer_"\]\s*\{[^}]*\}\s*/,
-        '',
-    );
-
-    // Add self-matching rules (no space) for elements where .YBYrtl is on the same element
-    // In Auto mode, .YBYrtl is added directly to the bubble, not to #root
-    css += `
-/* Auto mode — self-matching rules for .YBYrtl on the bubble itself */
-.YBYrtl[class*="userMessage_"],
-.YBYrtl[class*="userMessageContainer_"] {
-    direction: rtl;
-    unicode-bidi: plaintext;
-    text-align: right !important;
-    align-items: flex-end !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-}
-
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
-    direction: rtl;
-    unicode-bidi: plaintext;
-}
-
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
-    text-align: right;
-}
-
-/* Prompt input — no .YBYrtl ancestor in Auto mode, so target directly */
-[class*="messageInput_"] {
-    unicode-bidi: plaintext;
-    text-align: start;
-}
-`;
-
-    return css;
-}
