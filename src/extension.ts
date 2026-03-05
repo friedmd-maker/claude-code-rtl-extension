@@ -30,6 +30,7 @@ async function handleMode(
     label: string,
     mode: RtlMode,
     action: InjectionAction,
+    noChangeMessage?: string,
 ): Promise<void> {
     const extensions = await findClaudeExtensions();
     if (extensions.length === 0) {
@@ -53,6 +54,8 @@ async function handleMode(
 
     if (anyChanged) {
         vscode.commands.executeCommand('workbench.action.reloadWindow');
+    } else if (noChangeMessage) {
+        vscode.window.showInformationMessage(noChangeMessage);
     }
 }
 
@@ -64,31 +67,7 @@ async function handleFixBidi(): Promise<void> {
 }
 
 async function handleRemove(): Promise<void> {
-    const extensions = await findClaudeExtensions();
-    if (extensions.length === 0) {
-        vscode.window.showWarningMessage('No Claude Code extensions found.');
-        return;
-    }
-
-    const channel = getOutputChannel();
-    channel.clear();
-    channel.appendLine('Deactivating RTL support...\n');
-
-    let anyChanged = false;
-    for (const ext of extensions) {
-        const result = await removeRtl(ext);
-        result.messages.forEach(m => channel.appendLine(m));
-        if (result.changed) anyChanged = true;
-    }
-
-    channel.show(true);
-    await saveMode('inactive');
-
-    if (anyChanged) {
-        vscode.commands.executeCommand('workbench.action.reloadWindow');
-    } else {
-        vscode.window.showInformationMessage('RTL is already inactive.');
-    }
+    await handleMode('Deactivating RTL support', 'inactive', removeRtl, 'RTL is already inactive.');
 }
 
 async function handleStatus(): Promise<void> {

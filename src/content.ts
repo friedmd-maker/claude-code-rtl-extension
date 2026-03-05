@@ -52,17 +52,19 @@ const BUTTON_STYLES = `
 `;
 
 /** RTL content rules — prefix is prepended to each selector */
-function rtlContentRules(p: string): string {
+function rtlContentRules(p: string, options?: { skipMessagesContainer?: boolean }): string {
+    const messagesContainer = options?.skipMessagesContainer ? '' : `
+/* Messages container */
+${p}[class*="messagesContainer_"] {
+    direction: rtl;
+}
+`;
     return `
 /* ==========================================
    RTL - Hebrew/Arabic content (active when .YBYrtl is on #root)
    ========================================== */
-
-/* Messages container + user messages */
-${p}[class*="messagesContainer_"] {
-    direction: rtl;
-}
-
+${messagesContainer}
+/* User messages */
 ${p}[class*="userMessage_"],
 ${p}[class*="userMessageContainer_"] {
     direction: rtl;
@@ -190,9 +192,14 @@ ${p}[class*="thinkingContent_"] [class*="root_"] :is(ul, ol, li) {
 `;
 }
 
-/** Auto mode self-matching rules (.YBYrtl on the bubble itself, not on #root) */
-const AUTO_SELF_RULES = `
-/* Auto mode — self-matching rules for .YBYrtl on the bubble itself */
+/** Auto mode RTL rules — .YBYrtl is on the bubble itself, not on #root.
+ *  Uses descendant selectors from the bubble, plus self-matching for the bubble element. */
+const AUTO_RTL_RULES = `
+/* ==========================================
+   RTL - Auto mode (per-bubble detection)
+   ========================================== */
+
+/* Self-matching: bubble element itself */
 .YBYrtl[class*="userMessage_"],
 .YBYrtl[class*="userMessageContainer_"] {
     direction: rtl;
@@ -203,18 +210,39 @@ const AUTO_SELF_RULES = `
     margin-right: 0 !important;
 }
 
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
+/* Descendant: content inside RTL bubbles */
+.YBYrtl [class*="content_"][class*="xGDvVg"],
+.YBYrtl [class*="content_"] > span {
+    unicode-bidi: plaintext;
+}
+
+/* Claude's markdown responses (excluding thinking block) */
+.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) {
     direction: rtl;
     unicode-bidi: plaintext;
 }
 
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
-.YBYrtl[class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
+.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(p, ul, ol, h1, h2, h3, h4, blockquote),
+.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) > :is(ul, ol) li {
     text-align: right;
 }
 
+.YBYrtl [class*="root_"]:not([class*="thinkingContent_"] [class*="root_"]) a {
+    unicode-bidi: plaintext;
+}
+
+/* Question/answer blocks */
+.YBYrtl [class*="questionBlock_"],
+.YBYrtl [class*="questionHeader_"],
+.YBYrtl [class*="answerText_"],
+.YBYrtl [class*="optionText_"],
+.YBYrtl [class*="optionContent_"] {
+    direction: rtl;
+    unicode-bidi: plaintext;
+}
+
 /* Prompt input — no .YBYrtl ancestor in Auto mode, so target directly */
-[class*="messageInput_"] {
+.YBYrtl [class*="messageInput_"] {
     unicode-bidi: plaintext;
     text-align: start;
 }
@@ -246,18 +274,11 @@ export function generateAlwaysCssRules(): string {
     ]);
 }
 
-/** Auto mode — .YBYrtl prefix (on bubble, not root) + auto self-matching rules, no button, no messagesContainer */
+/** Auto mode — dedicated RTL rules (no descendant/self conflicts) + LTR overrides */
 export function generateAutoCssRules(): string {
-    // Use prefixed rules but remove messagesContainer (not needed in auto — .YBYrtl is on individual bubbles)
-    const contentRules = rtlContentRules(P).replace(
-        /\/\* Messages container \+ user messages \*\/\n.YBYrtl \[class\*="messagesContainer_"\] \{[^}]*\}\n\n/,
-        '/* Messages container — skipped in Auto mode (class is on bubble, not root) */\n\n',
-    );
-
     return assembleCss(RTL_MODE_AUTO_MARKER, [
-        contentRules,
+        AUTO_RTL_RULES,
         ltrOverrideRules(P),
-        AUTO_SELF_RULES,
     ]);
 }
 

@@ -62,7 +62,7 @@ export async function isAutoMode(cssPath: string): Promise<boolean> {
 /**
  * Check if JS toggle markers exist in the file.
  */
-export async function isJsInstalled(jsPath: string | null): Promise<boolean> {
+async function isJsInstalled(jsPath: string | null): Promise<boolean> {
     if (!jsPath) return false;
     try {
         const content = await fs.readFile(jsPath, 'utf-8');
