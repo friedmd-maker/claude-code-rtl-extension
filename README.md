@@ -1,22 +1,38 @@
 # Claude Code RTL Support
 
-> **Adds Right-to-Left (RTL) text support for Hebrew, Arabic & Persian to the Claude Code for VS Code extension.**
+> **Adds Right-to-Left (RTL) text support for Hebrew, Arabic & Persian to Claude Code in VS Code, Cursor & Antigravity.**
 
 ---
 
 ## 🌐 Languages | שפות | اللغات | زبان‌ها
 
-| | Language | Jump to |
+| | Language | Quick Links |
 |---|---|---|
-| 🇮🇱 | עברית | [קפוץ ↓](#hebrew) |
-| 🇸🇦 | عربية | [انتقل ↓](#arabic) |
-| 🇮🇷 | فارسی | [برو ↓](#persian) |
+| 🇺🇸 | English | [View Extension Explanation ↓](#english) |
+| 🇮🇱 | עברית | [להסבר על התוסף בעברית ↓](#hebrew) |
+| 🇸🇦 | عربية | [لشرح الملحق بالعربية ↓](#arabic) |
+| 🇮🇷 | فارسی | [برای توضیح افزونه به فارسی ↓](#persian) |
 
 ---
 
+### 🎬 Demo
+
+<details open>
+    <summary>🖼️ RTL <strong>⇄</strong> Button</summary>
+    <img src="assets/rtl-btn.gif" alt="RTL Toggle Button" width="600" height="auto">
+</details>
+<details>
+    <summary>🖼️ Status Bar</summary>
+    <img src="assets/status-bar.gif" alt="Status Bar" width="600" height="auto">
+</details>
+
+<a id="english"></a>
+
+[🔝 Back to top](#claude-code-rtl-support)
+
 ## 🇺🇸 English
 
-A VS Code extension that adds Right-to-Left (RTL) text direction support to the **Claude Code for VS Code** chat interface. Designed for Hebrew, Arabic, and Persian speakers who want natural text alignment when chatting with Claude — without affecting code blocks or UI elements.
+A VS Code extension that adds Right-to-Left (RTL) text direction support to the **Claude Code** chat interface in VS Code, Cursor, and Antigravity. Designed for Hebrew, Arabic, and Persian speakers who want natural text alignment when chatting with Claude — without affecting code blocks or UI elements.
 
 ### 🤔 Why is this needed?
 
@@ -43,25 +59,34 @@ The original Claude Code for VS Code extension lacks native RTL support. This of
 
 ---
 
-### 🆕 What's New (v0.3.6)
+### 🆕 What's New (v0.3.7)
+
+- **Antigravity IDE support** — The extension now detects and supports Antigravity alongside VS Code and Cursor.
+
+<details>
+<summary><strong>Previous versions</strong></summary>
+
+#### v0.3.6
 
 - **Smart input direction** — The input field now detects text direction on the fly based on the first character you type. Start with a Hebrew, Arabic, or Persian letter and it flows RTL; start with English and it stays LTR. The only exception is **Active** mode with the ⇄ button toggled on — there the input is always RTL.
 - **Fallback button placement** — When the chat header isn't rendered yet (e.g. resuming an active session on startup), the ⇄ toggle button now appears above the input area so you're never left without it.
 - **Safer auto-reactivate** — Version tracking ensures RTL is cleanly re-injected after a Claude Code update instead of stacking on stale CSS.
 
-### Previous (v0.3.5)
+#### v0.3.5
 
 - **Auto RTL mode** — An intelligent mode that auto-detects Hebrew, Arabic, and Persian text per chat bubble using a MutationObserver. Only bubbles containing RTL text get right-to-left direction — English-only bubbles stay LTR. No manual toggling needed.
 
-### Previous (v0.3.0)
+#### v0.3.0
 
 - **Always RTL mode** — A new mode that permanently enables RTL without needing the toggle button. CSS is injected directly without class dependency, so RTL is always active. Switch between modes via the status bar menu or command palette.
 - **Auto-reactivate** — RTL is automatically restored when Claude Code updates replace its files. No need to manually re-activate.
 - **Auto-activate on install** — RTL activates automatically on first install.
 
-### Previous (v0.2.0)
+#### v0.2.0
 
 - **Fix BiDi command** — Solves the reversed text issue where Hebrew/Arabic/Persian words appear mirrored (e.g. "םולש" instead of "שלום"). This happens because Claude Code injects a `*{direction:ltr;unicode-bidi:bidi-override}` rule that forces all text to LTR. The new **Fix BiDi** command activates RTL and removes this problematic rule automatically.
+
+</details>
 
 ---
 
@@ -77,6 +102,7 @@ The original Claude Code for VS Code extension lacks native RTL support. This of
 |---|
 | VS Code |
 | Cursor |
+| Antigravity |
 
 ---
 
@@ -212,10 +238,9 @@ MIT — see [LICENSE](LICENSE) for details.
 
 <a id="hebrew"></a>
 
-<details open>
-<summary><strong>🇮🇱 עברית</strong></summary>
-
 <div dir="rtl" lang="he">
+
+[🔝 חזרה למעלה](#claude-code-rtl-support)
 
 ## 🇮🇱 עברית
 
@@ -246,25 +271,34 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-### 🆕 מה חדש (v0.3.6)
+### 🆕 מה חדש (v0.3.7)
+
+- **תמיכה ב-Antigravity IDE** — התוסף מזהה ותומך כעת ב-Antigravity לצד VS Code ו-Cursor.
+
+<details>
+<summary><strong>גרסאות קודמות</strong></summary>
+
+#### v0.3.6
 
 - **כיוון חכם בשדה הקלט** — שדה הקלט מזהה עכשיו את כיוון הטקסט בזמן אמת לפי התו הראשון שמקלידים. מתחילים באות עברית, ערבית או פרסית — הטקסט זורם ימינה; מתחילים באנגלית — נשאר שמאלה. היוצא מן הכלל הוא מצב **Active** כשכפתור ⇄ לחוץ — אז הקלט תמיד RTL.
 - **מיקום חלופי לכפתור** — כשהכותרת של הצ'אט עדיין לא נטענה (למשל בחזרה לשיחה פעילה עם הפעלה), כפתור ⇄ מופיע מעל שדה הקלט כדי שתמיד יהיה נגיש.
 - **הפעלה מחדש אוטומטית בטוחה יותר** — מעקב אחר גרסה מבטיח שה-RTL מוזרק מחדש בצורה נקייה לאחר עדכון Claude Code במקום להיערם על CSS ישן.
 
-### גרסה קודמת (v0.3.5)
+#### v0.3.5
 
 - **מצב RTL אוטומטי** — מצב חכם שמזהה אוטומטית טקסט בעברית, ערבית ופרסית לכל בועת צ'אט באמצעות MutationObserver. רק בועות שמכילות טקסט RTL מקבלות כיווניות מימין לשמאל — בועות באנגלית בלבד נשארות LTR. ללא צורך בהחלפה ידנית.
 
-### גרסה קודמת (v0.3.0)
+#### v0.3.0
 
 - **מצב RTL תמידי** — מצב חדש שמפעיל RTL לצמיתות ללא צורך בכפתור מתג. ה-CSS מוזרק ישירות ללא תלות ב-class, כך ש-RTL תמיד פעיל. ניתן לעבור בין מצבים דרך תפריט שורת המצב או לוח הפקודות.
 - **הפעלה מחדש אוטומטית** — RTL משוחזר אוטומטית כאשר עדכון Claude Code מחליף את הקבצים. אין צורך להפעיל ידנית מחדש.
 - **הפעלה אוטומטית בהתקנה** — RTL מופעל אוטומטית בהתקנה ראשונה.
 
-### גרסאות קודמות (v0.2.0)
+#### v0.2.0
 
 - **פקודת Fix BiDi** — פותרת את בעיית הטקסט ההפוך שבה מילים בעברית/ערבית/פרסית מופיעות מראה (למשל "םולש" במקום "שלום"). זה קורה כי Claude Code מזריק כלל CSS בעייתי `*{direction:ltr;unicode-bidi:bidi-override}` שכופה כיוון LTR על כל הטקסט. הפקודה החדשה **Fix BiDi** מפעילה RTL ומסירה את הכלל הבעייתי אוטומטית.
+
+</details>
 
 ---
 
@@ -280,6 +314,7 @@ MIT — see [LICENSE](LICENSE) for details.
 |---|
 | VS Code |
 | Cursor |
+| Antigravity |
 
 ---
 
@@ -409,20 +444,17 @@ MIT — see [LICENSE](LICENSE) for details.
 
 MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
+[🔝 חזרה למעלה](#claude-code-rtl-support)
+
 </div>
-
-[🔝 חזרה לראש](#claude-code-rtl-support)
-
-</details>
 
 ---
 
 <a id="arabic"></a>
 
-<details open>
-<summary><strong>🇸🇦 عربية</strong></summary>
-
 <div dir="rtl" lang="ar">
+
+[🔝 العودة إلى الأعلى](#claude-code-rtl-support)
 
 ## 🇸🇦 عربية
 
@@ -453,25 +485,34 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 ---
 
-### 🆕 ما الجديد (v0.3.6)
+### 🆕 ما الجديد (v0.3.7)
+
+- **دعم Antigravity IDE** — الإضافة الآن تكتشف وتدعم Antigravity إلى جانب VS Code و Cursor.
+
+<details>
+<summary><strong>الإصدارات السابقة</strong></summary>
+
+#### v0.3.6
 
 - **اتجاه ذكي في حقل الإدخال** — حقل الإدخال الآن يكتشف اتجاه النص تلقائيًا بناءً على أول حرف تكتبه. ابدأ بحرف عربي أو عبري أو فارسي ويتجه النص لليمين؛ ابدأ بالإنجليزية ويبقى لليسار. الاستثناء الوحيد هو وضع **Active** عند تفعيل زر ⇄ — حيث يكون الإدخال دائمًا RTL.
 - **موقع بديل للزر** — عندما لا يكون رأس المحادثة معروضًا بعد (مثلاً عند استئناف جلسة نشطة عند بدء التشغيل)، يظهر زر ⇄ فوق منطقة الإدخال حتى لا تبقى بدونه.
 - **إعادة تفعيل تلقائية أكثر أمانًا** — تتبع الإصدار يضمن إعادة حقن RTL بشكل نظيف بعد تحديث Claude Code بدلاً من التراكم على CSS قديم.
 
-### السابق (v0.3.5)
+#### v0.3.5
 
 - **وضع RTL التلقائي** — وضع ذكي يكتشف تلقائيًا النص العربي والعبري والفارسي لكل فقاعة محادثة باستخدام MutationObserver. الفقاعات التي تحتوي على نص RTL فقط تحصل على اتجاه من اليمين إلى اليسار — الفقاعات الإنجليزية تبقى LTR. لا حاجة للتبديل اليدوي.
 
-### السابق (v0.3.0)
+#### v0.3.0
 
 - **وضع RTL الدائم** — وضع جديد يفعّل RTL بشكل دائم بدون الحاجة لزر التبديل. يتم حقن CSS مباشرة بدون اعتماد على class، لذا RTL يكون دائمًا نشطًا. يمكنك التبديل بين الأوضاع عبر قائمة شريط الحالة أو لوحة الأوامر.
 - **إعادة تفعيل تلقائية** — يتم استعادة RTL تلقائيًا عندما يقوم تحديث Claude Code باستبدال ملفاته. لا حاجة لإعادة التفعيل يدويًا.
 - **تفعيل تلقائي عند التثبيت** — يتم تفعيل RTL تلقائيًا عند التثبيت لأول مرة.
 
-### السابق (v0.2.0)
+#### v0.2.0
 
 - **أمر Fix BiDi** — يحل مشكلة النص المعكوس حيث تظهر الكلمات العربية/العبرية/الفارسية بشكل معكوس (مثل "ملاس" بدلاً من "سلام"). يحدث هذا لأن Claude Code يحقن قاعدة CSS `*{direction:ltr;unicode-bidi:bidi-override}` التي تجبر كل النص على LTR. الأمر الجديد **Fix BiDi** يفعّل RTL ويزيل هذه القاعدة تلقائيًا.
+
+</details>
 
 ---
 
@@ -487,6 +528,7 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 |---|
 | VS Code |
 | Cursor |
+| Antigravity |
 
 ---
 
@@ -616,20 +658,17 @@ MIT — ראה קובץ [LICENSE](LICENSE) לפרטים.
 
 MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
+[🔝 العودة إلى الأعلى](#claude-code-rtl-support)
+
 </div>
-
-[🔝 Back to top](#claude-code-rtl-support)
-
-</details>
 
 ---
 
 <a id="persian"></a>
 
-<details open>
-<summary><strong>🇮🇷 فارسی</strong></summary>
-
 <div dir="rtl" lang="fa">
+
+[🔝 بازگشت به بالا](#claude-code-rtl-support)
 
 ## 🇮🇷 فارسی
 
@@ -660,25 +699,34 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 ---
 
-### 🆕 تازه‌ها (v0.3.6)
+### 🆕 تازه‌ها (v0.3.7)
+
+- **پشتیبانی از Antigravity IDE** — افزونه اکنون Antigravity را در کنار VS Code و Cursor شناسایی و پشتیبانی می‌کند.
+
+<details>
+<summary><strong>نسخه‌های قبلی</strong></summary>
+
+#### v0.3.6
 
 - **جهت هوشمند در فیلد ورودی** — فیلد ورودی اکنون جهت متن را به‌صورت خودکار بر اساس اولین کاراکتر تایپ‌شده تشخیص می‌دهد. با حرف فارسی، عربی یا عبری شروع کنید و متن به سمت راست جریان می‌یابد؛ با انگلیسی شروع کنید و در سمت چپ باقی می‌ماند. تنها استثنا حالت **Active** است وقتی دکمه ⇄ فعال باشد — در آن صورت ورودی همیشه RTL است.
 - **مکان جایگزین برای دکمه** — وقتی هدر چت هنوز رندر نشده (مثلاً هنگام بازگشت به جلسه فعال در راه‌اندازی)، دکمه ⇄ بالای فیلد ورودی نمایش داده می‌شود تا همیشه در دسترس باشد.
 - **فعال‌سازی مجدد خودکار امن‌تر** — ردیابی نسخه تضمین می‌کند که RTL پس از به‌روزرسانی Claude Code به‌صورت تمیز دوباره تزریق شود به جای انباشته شدن روی CSS قدیمی.
 
-### قبلی (v0.3.5)
+#### v0.3.5
 
 - **حالت RTL خودکار** — حالت هوشمندی که به‌طور خودکار متن فارسی، عربی و عبری را در هر حباب چت با استفاده از MutationObserver شناسایی می‌کند. فقط حباب‌هایی که متن RTL دارند جهت راست به چپ می‌گیرند — حباب‌های انگلیسی LTR باقی می‌مانند. بدون نیاز به تغییر دستی.
 
-### قبلی (v0.3.0)
+#### v0.3.0
 
 - **حالت RTL همیشه** — حالت جدیدی که RTL را به‌صورت دائمی فعال می‌کند بدون نیاز به دکمه تغییر. CSS مستقیماً بدون وابستگی به class تزریق می‌شود، بنابراین RTL همیشه فعال است. می‌توانید بین حالت‌ها از طریق منوی نوار وضعیت یا پالت فرمان جابجا شوید.
 - **فعال‌سازی مجدد خودکار** — RTL به‌طور خودکار بازیابی می‌شود وقتی به‌روزرسانی Claude Code فایل‌هایش را جایگزین می‌کند. نیازی به فعال‌سازی مجدد دستی نیست.
 - **فعال‌سازی خودکار هنگام نصب** — RTL به‌طور خودکار هنگام نصب اولیه فعال می‌شود.
 
-### قبلی (v0.2.0)
+#### v0.2.0
 
 - **دستور Fix BiDi** — مشکل متن معکوس را حل می‌کند که در آن کلمات فارسی/عربی/عبری به صورت آینه‌ای نمایش داده می‌شوند (مثلاً "ملاس" به جای "سلام"). این اتفاق می‌افتد زیرا Claude Code یک قاعده CSS `*{direction:ltr;unicode-bidi:bidi-override}` تزریق می‌کند که همه متن‌ها را به LTR مجبور می‌کند. دستور جدید **Fix BiDi** پشتیبانی RTL را فعال کرده و این قاعده مشکل‌ساز را به‌صورت خودکار حذف می‌کند.
+
+</details>
 
 ---
 
@@ -694,6 +742,7 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 |---|
 | VS Code |
 | Cursor |
+| Antigravity |
 
 ---
 
@@ -823,8 +872,6 @@ MIT — انظر ملف [LICENSE](LICENSE) للتفاصيل.
 
 MIT — برای جزئیات فایل [LICENSE](LICENSE) را ببینید.
 
+[🔝 بازگشت به بالا](#claude-code-rtl-support)
+
 </div>
-
-[🔝 Back to top](#claude-code-rtl-support)
-
-</details>

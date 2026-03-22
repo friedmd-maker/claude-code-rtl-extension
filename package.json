@@ -1,8 +1,8 @@
 {
   "name": "claude-code-rtl",
   "displayName": "Claude Code RTL Support",
-  "description": "Adds RTL (Right-to-Left) text support for Hebrew, Arabic and Persian to Claude Code in VS Code and Cursor",
-  "version": "0.3.6",
+  "description": "Adds RTL (Right-to-Left) text support for Hebrew, Arabic and Persian to Claude Code in VS Code, Cursor and Antigravity",
+  "version": "0.3.7",
   "publisher": "yechielby",
   "license": "MIT",
   "repository": {
@@ -26,6 +26,10 @@
     "cursor-extension",
     "cursor-ide",
     "cursor-plugin",
+    "antigravity",
+    "antigravity-extension",
+    "antigravity-ide",
+    "antigravity-plugin",
     "farsi",
     "farsi-language",
     "hebrew",

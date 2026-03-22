@@ -5,11 +5,13 @@ import * as vscode from 'vscode';
 import { ClaudeExtensionInfo } from './types.js';
 
 /**
- * Detect whether we are running in VS Code or Cursor.
+ * Detect whether we are running in VS Code, Cursor, or Antigravity.
  */
-function detectIde(): 'vscode' | 'cursor' {
+function detectIde(): 'vscode' | 'cursor' | 'antigravity' {
     const appName = vscode.env.appName.toLowerCase();
-    return appName.includes('cursor') ? 'cursor' : 'vscode';
+    if (appName.includes('antigravity')) return 'antigravity';
+    if (appName.includes('cursor')) return 'cursor';
+    return 'vscode';
 }
 
 /**
@@ -88,18 +90,20 @@ async function getWslLinuxHomes(): Promise<string[]> {
 /**
  * Build the list of directories to search for Claude Code extensions.
  */
-async function getSearchDirectories(ide: 'vscode' | 'cursor'): Promise<string[]> {
+async function getSearchDirectories(ide: 'vscode' | 'cursor' | 'antigravity'): Promise<string[]> {
     const platform = process.platform;
     const dirs: string[] = [];
 
-    const addExtDirs = (home: string, ide: 'vscode' | 'cursor') => {
-        if (ide === 'vscode') {
-            dirs.push(path.join(home, '.vscode', 'extensions'));
-            dirs.push(path.join(home, '.vscode-server', 'extensions'));
-        } else {
-            dirs.push(path.join(home, '.cursor', 'extensions'));
-            dirs.push(path.join(home, '.cursor-server', 'extensions'));
-        }
+    const ideDirMap: Record<string, { local: string; server: string }> = {
+        vscode: { local: '.vscode', server: '.vscode-server' },
+        cursor: { local: '.cursor', server: '.cursor-server' },
+        antigravity: { local: '.antigravity', server: '.antigravity-server' },
+    };
+
+    const addExtDirs = (home: string, ide: 'vscode' | 'cursor' | 'antigravity') => {
+        const { local, server } = ideDirMap[ide];
+        dirs.push(path.join(home, local, 'extensions'));
+        dirs.push(path.join(home, server, 'extensions'));
     };
 
     if (platform === 'win32') {
@@ -111,7 +115,7 @@ async function getSearchDirectories(ide: 'vscode' | 'cursor'): Promise<string[]>
         // Also search inside WSL distros
         const wslHomes = await getWslLinuxHomes();
         for (const wslHome of wslHomes) {
-            const serverDir = ide === 'vscode' ? '.vscode-server' : '.cursor-server';
+            const serverDir = ideDirMap[ide].server;
             dirs.push(path.join(wslHome, serverDir, 'extensions'));
         }
     } else if (platform === 'darwin') {

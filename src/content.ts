@@ -1,10 +1,10 @@
 /** Marker at the beginning of injected CSS block */
 export const RTL_START_MARKER =
-    '/* RTL Text Support for Claude Code VS Code / Cursor Extension - Added by script */';
+    '/* RTL Text Support for Claude Code VS Code / Cursor / Antigravity Extension - Added by script */';
 
 /** Marker at the end of injected CSS block */
 export const RTL_END_MARKER =
-    '/* End RTL Text Support for Claude Code VS Code / Cursor Extension */';
+    '/* End RTL Text Support for Claude Code VS Code / Cursor / Antigravity Extension */';
 
 /** Marker at the beginning of injected JS block */
 export const JS_START_MARKER = '/* RTL Toggle Button - Added by script */';
