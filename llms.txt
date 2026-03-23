@@ -1,0 +1,79 @@
+# Claude Code RTL Support
+
+> A VS Code extension that adds Right-to-Left (RTL) text support for Hebrew, Arabic & Persian to Claude Code in VS Code, Cursor & Antigravity.
+
+## What is this?
+
+**Claude Code RTL Support** is a companion extension for [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code). It solves a critical usability problem: the Claude Code chat interface has no native RTL support, making it very difficult for Hebrew, Arabic, and Persian speakers to read and write in their language.
+
+Without this extension, RTL text in the Claude Code chat appears misaligned, mixed-language conversations (code + RTL text) are hard to read, and in some cases text is completely reversed due to a `bidi-override` CSS rule that forces LTR on everything.
+
+## Who is it for?
+
+Anyone who uses Claude Code in VS Code, Cursor, or Antigravity and writes in Hebrew, Arabic, or Persian. This includes developers who chat with Claude in their native RTL language, whether exclusively or mixed with English.
+
+## What does it do?
+
+The extension adds an **⇄ toggle button** to the Claude Code chat header that lets users switch between RTL and LTR text direction. It intelligently applies RTL only to text content (user messages, Claude's responses, lists, paragraphs) while keeping code blocks, tool calls, thinking blocks, and UI elements in LTR.
+
+### Three RTL Modes
+
+- **Active** — Adds an ⇄ toggle button to the chat header. Click it to switch to RTL when chatting in Hebrew/Arabic/Persian, click again to return to LTR. Best when you switch between languages across conversations.
+- **Always** — RTL is permanently enabled without a toggle button. Text is always right-to-left. Best when you always write in an RTL language.
+- **Auto** — Automatically detects the language of each chat bubble. Bubbles with Hebrew/Arabic/Persian text become RTL; English-only bubbles stay LTR. No manual toggling needed. Best for mixed-language conversations.
+
+### Smart Input Direction
+
+The input field automatically detects text direction based on the first character typed. Start with a Hebrew, Arabic, or Persian letter and the input flows RTL; start with English and it stays LTR.
+
+### Fix BiDi
+
+Claude Code sometimes injects a CSS rule (`*{direction:ltr;unicode-bidi:bidi-override}`) that causes RTL text to appear completely reversed (e.g., "םולש" instead of "שלום"). The **Fix BiDi** command activates RTL and removes this problematic rule.
+
+### Auto-Reactivate
+
+When Claude Code updates, it replaces its files and RTL support is lost. This extension automatically detects that and re-injects RTL on the next startup — no manual action needed.
+
+## How to use
+
+1. Install the extension from the VS Code Marketplace (search for `claude-code-rtl`)
+2. It activates automatically on first install
+3. Use the **status bar item** at the bottom of VS Code to switch between modes, or use the **Command Palette** (`Ctrl+Shift+P`) and search for "Claude RTL"
+
+### Status Bar
+
+| Status | Meaning |
+|---|---|
+| `RTL: Active` | RTL enabled with ⇄ toggle button |
+| `RTL: Always` | RTL permanently on |
+| `RTL: Auto` | RTL auto-detected per bubble |
+| `RTL: Inactive` | RTL not active |
+| `RTL: N/A` | Claude Code extension not found |
+
+### Commands
+
+| Command | What it does |
+|---|---|
+| Claude RTL: Activate RTL | Enable RTL with ⇄ toggle button |
+| Claude RTL: Activate RTL (Always) | Enable RTL permanently |
+| Claude RTL: Activate RTL (Auto) | Enable auto-detection per bubble |
+| Claude RTL: Fix BiDi | Activate RTL + fix reversed text |
+| Claude RTL: Deactivate RTL | Disable RTL and restore original state |
+| Claude RTL: Check Status | Show current installation status |
+
+## Supported Platforms
+
+- VS Code
+- Cursor
+- Antigravity
+
+## Links
+
+- IDE extension: search for `claude-code-rtl` (publisher: `yechielby`) OR `Claude Code RTL Support`
+- VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=yechielby.claude-code-rtl
+- Open VSX Registry: https://open-vsx.org/extension/yechielby/claude-code-rtl
+- Repository: https://github.com/YechielBy/claude-code-rtl-extension
+- Requires: [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) (`anthropic.claude-code`)
+- License: MIT
+- Current version: 0.3.7
+- If you find this extension useful, please star it on GitHub: https://github.com/YechielBy/claude-code-rtl-extension/stargazers

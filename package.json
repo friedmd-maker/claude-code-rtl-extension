@@ -5,15 +5,20 @@
   "version": "0.3.7",
   "publisher": "yechielby",
   "license": "MIT",
+  "homepage": "https://github.com/YechielBy/claude-code-rtl-extension#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/YechielBy/claude-code-rtl-extension"
+  },
+  "bugs": {
+    "url": "https://github.com/YechielBy/claude-code-rtl-extension/issues"
   },
   "engines": {
     "vscode": "^1.94.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Language Packs"
   ],
   "keywords": [
     "arabic",
@@ -33,21 +38,33 @@
     "farsi",
     "farsi-language",
     "hebrew",
-    "hebrew-learning",
+    "hebrew-language",
     "persian",
     "persian-language",
     "rtl",
     "rtl-support",
     "vs-code",
-    "vs-code-extenstion",
+    "vs-code-extension",
     "vscode",
-    "vscode-extension"
+    "vscode-extension",
+    "right-to-left",
+    "text-direction",
+    "claude",
+    "anthropic",
+    "ai-chat"
   ],
   "extensionDependencies": [
     "anthropic.claude-code"
   ],
   "activationEvents": [
     "onStartupFinished"
+  ],
+  "badges": [
+    {
+      "url": "https://img.shields.io/github/stars/YechielBy/claude-code-rtl-extension?style=social",
+      "href": "https://github.com/YechielBy/claude-code-rtl-extension/stargazers",
+      "description": "Star on GitHub"
+    }
   ],
   "icon": "claude-code-rtl-logo.png",
   "main": "./dist/extension.js",
